@@ -6,7 +6,7 @@ from datetime import datetime
 from scapy.all import sniff, TCP, UDP, ICMP
 
 class TrafficProcessor:
-    def __init__(self, interface="eth0", output_file="data.txt"):
+    def __init__(self, interface="any", output_file="data.txt"):
         self.interface = interface
         self.output_file = output_file
         
@@ -104,12 +104,16 @@ class TrafficProcessor:
         print("[TP] Stopped")
 
 
-parser = argparse.ArgumentParser(description="Simple Traffic Processor - MVP V1")
-parser.add_argument("-i", "--interface", default="any", help="Network interface to capture from (default: any)")
-parser.add_argument("-o", "--output", default="data.txt", help="Output file path (default: data.txt)")
-args = parser.parse_args()
+def main():
+    parser = argparse.ArgumentParser(description="Simple Traffic Processor - MVP V1")
+    parser.add_argument("-i", "--interface", default="any", help="Network interface to capture from (default: any)")
+    parser.add_argument("-o", "--output", default="data.txt", help="Output file path (default: data.txt)")
+    args = parser.parse_args()
     
-tp = TrafficProcessor(interface=args.interface, output_file=args.output)
-tp.start()
+    tp = TrafficProcessor(interface=args.interface, output_file=args.output)
+    tp.start()
+
+if __name__ == "__main__":
+    main()
 
 
