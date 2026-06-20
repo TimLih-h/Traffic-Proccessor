@@ -38,9 +38,6 @@
 **Speaker 1:** If we turn it back on, everything should work automatically.
 **Speaker 1:** Yeah, yeah, yeah.
 **Customer:** Okay, let's continue.
-
----
-
 **Speaker 2:** What version is it? The base, the base installation scans absolutely everything that comes through the computer.
 **Customer:** So, you have, you have there now?
 **Speaker 2:** There's the base one.
@@ -205,7 +202,6 @@
 **Speaker 1:** Ну, всё, у нас есть всё соединённое. Там, если есть фронтенд и бэкэнд. Сейчас. Тут.
 **Customer:** Демонстрацию можете локально всё запускать?
 **Speaker 1:** Ну да, да, да.
-
 **Speaker 1:** Получается, можно просто в одной консольке запустить сам ТП. Да.
 **Speaker 1:** У нас все данные копируются куда? Текстовый. И вот из этого текста. У нас сервер берёт мои данные.
 **Speaker 1:** Бэкенд должен передавать Communication Node. У нас сейчас всё локально. Так?
@@ -226,9 +222,6 @@
 **Speaker 1:** Если включим обратно, должны всё автоматически заработать.
 **Speaker 1:** Ну, да, да, да.
 **Customer:** Так, ну давайте продолжим.
-
----
-
 **Speaker 2:** Что версия, вон? Базы, базы в базовой установке сканируют абсолютно всё, что приходит через компьютер.
 **Customer:** Так, у вас, у вас там сейчас?
 **Speaker 2:** Там базовая.
