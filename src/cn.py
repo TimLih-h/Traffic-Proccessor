@@ -1,6 +1,6 @@
 """CommunicationNode
 
-python CommunicationNode.py --file numbers.txt --url http://localhost:8000/ingest --delay 0.1
+Continuously reads json from a text file and sends batches to an HTTP endpoint.
 """
 from __future__ import annotations
 
@@ -10,27 +10,13 @@ import sys
 import time
 from urllib import request, error
 
-
-def read_numbers(path: str) -> list[int]:
-	"""Read and return all numeric values (int) from `path` as a list.
-
-	Lines beginning with '#' and empty lines are ignored.
-	"""
-	numbers = []
-	with open(path, "r") as f:
-		for lineno, line in enumerate(f, start=1):
-			if lineno > 2:
-				break
-			s = line.strip()
-			if not s or s.startswith("#"):
-				continue
-			try:
-				# allow integers or floats
-				val = int(s)
-			except ValueError:
-				raise ValueError(f"Invalid numeric value on line {lineno}: {s}")
-			numbers.append(val)
-	return numbers
+def read_json(path: str) -> dict:
+    """Read and return JSON object from `path`."""
+    with open(path, "r") as f:
+        try:
+            return json.load(f)
+        except json.JSONDecodeError as e:
+            raise ValueError(f"Invalid JSON in {path}: {e}") from e
 
 
 def post_json(url: str, payload: dict, timeout: float = 5.0) -> tuple[int, str]:
@@ -55,12 +41,7 @@ def post_json(url: str, payload: dict, timeout: float = 5.0) -> tuple[int, str]:
 
 
 def send_numbers_batch(file_path: str, url: str, retries: int = 3) -> None:
-	"""Read all numbers from `file_path` and send as a single JSON batch to `url`.
-
-	Payload format: {"metric" : value}
-	"""
-	numbers = read_numbers(file_path)
-	payload = {"inbound": numbers[0], "outbound": numbers[1]}
+	payload = read_json(file_path)
 	attempt = 0
 	while True:
 		attempt += 1
@@ -70,7 +51,7 @@ def send_numbers_batch(file_path: str, url: str, retries: int = 3) -> None:
 			status = None
 
 		if status is not None and 200 <= status < 300:
-			print(f"[{time.strftime('%Y-%m-%d %H:%M:%S')}] Sent {len(numbers)} metrics -> {url} (status {status})")
+			print(f"[{time.strftime('%Y-%m-%d %H:%M:%S')}] Sent batch -> {url} (status {status})")
 			return
 		else:
 			print(f"[{time.strftime('%Y-%m-%d %H:%M:%S')}] Failed to send batch (attempt {attempt}): status={status}")
@@ -82,25 +63,25 @@ def send_numbers_batch(file_path: str, url: str, retries: int = 3) -> None:
 			time.sleep(wait)
 
 
-def send_numbers_loop(file_path: str, url: str, loop_delay: float = 1.0, retries: int = 3) -> None:
-	"""Loops indefinitely, pausing `loop_delay` seconds between reads.
+def send_numbers_loop(file_path: str, url: str, delay: float = 1.0, retries: int = 3) -> None:
+	"""Loops indefinitely, pausing `delay` seconds between reads.
 
 	Sends each batch of numbers read from `file_path` to `url`.
 	"""
-	print(f"Starting continuous loop: reading {file_path} every {loop_delay}s, sending to {url}")
+	print(f"Starting continuous loop: reading {file_path} every {delay}s, sending to {url}")
 	while True:
 		try:
 			send_numbers_batch(file_path, url, retries=retries)
 		except Exception as exc:
 			print(f"Error reading/sending batch: {exc}", file=sys.stderr)
-		time.sleep(loop_delay)
+		time.sleep(delay)
 
 
 def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
 	p = argparse.ArgumentParser(description="Continuously send numbers from a text file to an HTTP endpoint as JSON batch.")
-	p.add_argument("--file", "-f", type=str, default="stats.txt", help="Path to input text file containing numbers (one per line)")
+	p.add_argument("--file", "-f", type=str, default="data.txt", help="Path to input json")
 	p.add_argument("--url", "-u", type=str, default="http://localhost:8000", help="HTTP endpoint URL to POST batches to")
-	p.add_argument("--loop-delay", "-l", type=float, default=0.5, help="Delay in seconds between loop iterations (default 0.5)")
+	p.add_argument("--delay", "-d", type=float, default=0.5, help="Delay in seconds between loop iterations (default 0.5)")
 	p.add_argument("--retries", "-r", type=int, default=3, help="Retries per batch on failure (default 3)")
 	return p.parse_args(argv)
 
@@ -108,7 +89,7 @@ def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
 def main(argv: list[str] | None = None) -> int:
 	args = _parse_args(argv)
 	try:
-		send_numbers_loop(args.file, args.url, loop_delay=args.loop_delay, retries=args.retries)
+		send_numbers_loop(args.file, args.url, delay=args.delay, retries=args.retries)
 	except KeyboardInterrupt:
 		print("\nShutting down...", file=sys.stderr)
 		return 0
