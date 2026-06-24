@@ -3,12 +3,15 @@ import json
 import argparse
 import threading
 from datetime import datetime
+from urllib import request, error
 from scapy.all import sniff, TCP, UDP, ICMP
 
 class TrafficProcessor:
-    def __init__(self, interface="any", output_file="data.txt"):
+    def __init__(self, interface="any", output_url="http://localhost:8080", delay=0.5, retries=3):
         self.interface = interface
-        self.output_file = output_file
+        self.output_url = output_url
+        self.delay = delay
+        self.retries = retries
         
         #Statistics
         self.packet_cnt = 0
@@ -23,10 +26,10 @@ class TrafficProcessor:
         
         #States
         self.running = False
-        self.writer_thread = None
+        self.sender_thread = None
         
         print(f"[TP] Initialized on interface: {interface}")
-        print(f"[TP] Output file: {output_file}")
+        print(f"[TP] Output file: {output_url}")
     
     def packet_handler(self, packet):
         self.packet_cnt += 1
@@ -62,20 +65,55 @@ class TrafficProcessor:
             "status": "online"
         }
     
-    def write_stats(self):
+    def post_json(self) -> tuple[int, str]:
         stats = self.get_stats()
+        data = json.dumps(stats).encode("utf-8")
+        req = request.Request(self.output_url, data=data, headers={"Content-Type": "application/json"}, method="POST")
         try:
-            with open(self.output_file, 'w') as f:
-                json.dump(stats, f)
-                f.write('\n')
-        except Exception as e:
-            print(f"[TP] Error writing to file: {e}")
+            with request.urlopen(req, timeout=0.5) as resp:
+                body = resp.read().decode("utf-8", errors="replace")
+                return resp.getcode(), body
+        except error.HTTPError as he:
+            # HTTP error with response body
+            try:
+                body = he.read().decode("utf-8", errors="replace")
+            except Exception:
+                body = ""
+            return he.code, body
+        except Exception:
+            raise
+    
+    def send_stats(self):
+        try:
+            self.post_json()
+        except Exception:
+            return
+        return
+        attempt = 0
+        while True:
+            attempt += 1
+            try:
+                status, body = self.post_json()
+            except Exception:
+                status = None
+
+            if status is not None and 200 <= status < 300:
+                print(f"[{time.strftime('%Y-%m-%d %H:%M:%S')}] Sent batch -> {self.output_url} (status {status})")
+                return
+            else:
+                print(f"[{time.strftime('%Y-%m-%d %H:%M:%S')}] Failed to send batch (attempt {attempt}): status={status}")
+                if attempt >= self.retries:
+                    print(f"Giving up after {self.retries} attempts")
+                    return
+                wait = 0.5 * attempt
+                print(f"Retrying in {wait} seconds...")
+                time.sleep(wait)
     
     def writer_loop(self):
         print("[TP] Writer thread started")
         while self.running:
-            self.write_stats()
-            time.sleep(1)  #Update every second
+            self.send_stats()
+            time.sleep(self.delay)  # Update every (delay) seconds
     
     def start(self):
         if self.running:
@@ -83,9 +121,9 @@ class TrafficProcessor:
             return
     
         self.running = True
-        self.writer_thread = threading.Thread(target=self.writer_loop)
-        self.writer_thread.daemon = True
-        self.writer_thread.start()
+        self.sender_thread = threading.Thread(target=self.writer_loop)
+        self.sender_thread.daemon = True
+        self.sender_thread.start()
         
         print(f"[TP] Starting packet capture on {self.interface}...")
         print("[TP] Press Ctrl+C to stop")
@@ -98,19 +136,21 @@ class TrafficProcessor:
     
     def stop(self):
         self.running = False
-        if self.writer_thread and self.writer_thread.is_alive():
-            self.writer_thread.join(timeout=2)
-        self.write_stats()
+        if self.sender_thread and self.sender_thread.is_alive():
+            self.sender_thread.join(timeout=2)
+        self.send_stats()
         print("[TP] Stopped")
 
 
 def main():
     parser = argparse.ArgumentParser(description="Simple Traffic Processor - MVP V1")
-    parser.add_argument("-i", "--interface", default="any", help="Network interface to capture from (default: any)")
-    parser.add_argument("-o", "--output", default="data.txt", help="Output file path (default: data.txt)")
+    parser.add_argument("-i", "--interface", type=str, default="any", help="Network interface to capture from (default: any)")
+    parser.add_argument("-u", "--url", type=str, default="http://localhost:8080", help="HTTP endpoint URL to POST batches to")
+    parser.add_argument("-d", "--delay", type=float, default=0.5, help="Delay in seconds between loop iterations (default 0.5)")
+    parser.add_argument("-r", "--retries", type=int, default=3, help="Retries per batch on failure (default 3)")
     args = parser.parse_args()
     
-    tp = TrafficProcessor(interface=args.interface, output_file=args.output)
+    tp = TrafficProcessor(interface=args.interface, output_url=args.url, delay=args.delay, retries=args.retries)
     tp.start()
 
 if __name__ == "__main__":
