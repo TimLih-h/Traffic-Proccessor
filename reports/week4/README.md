@@ -6,12 +6,12 @@
 **Short Description:** A network visibility and control tool that captures live packet counters, per-connection statistics, traffic history, and supports blocking, tunneling, and failover behaviours.  
 **Root LICENSE:** [LICENSE](/LICENSE)
 
-- [Product backlog](https://github.com/mrZom49/Traffic-Proccessor-SWP-46/issues)
-- [Sprint backlog](https://github.com/users/mrZom49/projects/3)
-- [Sprint milestone](https://github.com/mrZom49/Traffic-Proccessor-SWP-46/milestone/2)
+- [Product backlog](https://github.com/SWP-Team-46/Traffic-Proccessor/issues)
+- [Sprint backlog](https://github.com/SWP-Team-46/Traffic-Proccessor/projects/1)
+- [Sprint milestone](https://github.com/SWP-Team-46/Traffic-Proccessor/milestone/2)
 - Sprint Goal, Sprint dates, and short scope summary.
 - TBD
-- Summary of delivered product changes.
+- TP and CN are now united, TP now counts incoming/outcoming packets, more documentation
 - [Product](http://147.45.234.218:8080)
 - [README](/README.md)
 - Customer feedback response table with feedback points and resulting PBIs or issues.
@@ -29,7 +29,7 @@
 - Links to automated quality requirement tests.
 - Link to the CI pipeline.
 - Link to the latest protected-default-branch CI run.
-- [Protection](https://github.com/mrZom49/Traffic-Proccessor-SWP-46/settings/rules/17694937) <!--IDK what to put here-->
+- [Protection](https://github.com/SWP-Team-46/Traffic-Proccessor/settings/rules/17694937) <!--IDK what to put here-->
 - Screenshots or report links for linting, coverage, tests, and the additional QA check.
 - Short explanation of how the Assignment 4 tests, CI checks, quality requirement tests, and Definition of Done will continue to govern later project work.
 - Link to the SemVer release mapped to the Assignment 4 Sprint increment.
