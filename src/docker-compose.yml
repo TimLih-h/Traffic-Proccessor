@@ -42,7 +42,7 @@ services:
       python cn.py
       --file /data/data.txt
       --url http://cnss:8080/
-      --delay 2
+      --delay 1
       --retries 5
     depends_on:
       - cnss
