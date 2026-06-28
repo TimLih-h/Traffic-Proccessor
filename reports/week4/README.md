@@ -7,7 +7,7 @@
 **Root LICENSE:** [LICENSE](/LICENSE)
 
 - [Product backlog](https://github.com/SWP-Team-46/Traffic-Proccessor/issues)
-- [Sprint backlog](https://github.com/SWP-Team-46/Traffic-Proccessor/projects/1)
+- [Sprint backlog](https://github.com/orgs/SWP-Team-46/projects/1)
 - [Sprint milestone](https://github.com/SWP-Team-46/Traffic-Proccessor/milestone/2)
 - Sprint Goal, Sprint dates, and short scope summary.
 - TBD
