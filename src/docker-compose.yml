@@ -78,7 +78,7 @@ services:
     restart: unless-stopped
 
   # --------------------------------------------------------
-  # 4. PostgreSQL
+  # 3. PostgreSQL
   # --------------------------------------------------------
   postgres:
     image: postgres:14.8-alpine3.18
