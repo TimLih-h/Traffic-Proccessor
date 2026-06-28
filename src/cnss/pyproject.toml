@@ -1,7 +1,7 @@
 [project]
-name = "fastapi-template"
+name = "cnss"
 version = "0.1.0"
-description = ""
+description = "Control-n status server"
 authors = [
     {name = "Your Name",email = "you@example.com"}
 ]
@@ -15,7 +15,9 @@ dependencies = [
     "dotenv (>=0.9.9,<0.10.0)",
     "aiosqlite (>=0.22.1,<0.23.0)",
     "asyncpg (>=0.31.0,<0.32.0)",
-    "uvicorn (>=0.40.0,<0.41.0)"
+    "uvicorn (>=0.40.0,<0.41.0)",
+    "httpx (>=0.28.1,<0.29.0)",
+    "pytest (>=9.1.1,<10.0.0)"
 ]
 
 
