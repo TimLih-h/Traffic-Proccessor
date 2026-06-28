@@ -10,9 +10,9 @@
 - [Sprint backlog](https://github.com/orgs/SWP-Team-46/projects/1)
 - [Sprint milestone](https://github.com/SWP-Team-46/Traffic-Proccessor/milestone/2)
 - Sprint Goal, Sprint dates, and short scope summary.
-- TBD
+- Total story point in this sprint is **8**
 - TP and CN are now united, TP now counts incoming/outcoming packets, more documentation
-- [Product](http://147.45.234.218:8080)
+- [Deployed Product](http://147.45.234.218:8080)
 - [README](/README.md)
 - Customer feedback response table with feedback points and resulting PBIs or issues.
 - Explanation of feedback not addressed.
@@ -24,10 +24,10 @@
 - [user acceptance tests](/docs/user-acceptance-tests.md)
 - Summary of the quality model used and selected ISO/IEC 25010 sub-characteristics.
 - Testing status summary, including critical modules and per-module line coverage status.
-- Links to unit tests.
+- [TP unit tests](/src/Traffic_Processor/test_TP+CN.py)
 - Links to integration tests.
 - Links to automated quality requirement tests.
-- Link to the CI pipeline.
+- [CI pipeline](/.github/workflows/main.yml)
 - Link to the latest protected-default-branch CI run.
 - [Protection](https://github.com/SWP-Team-46/Traffic-Proccessor/settings/rules/17694937) <!--IDK what to put here-->
 - Screenshots or report links for linting, coverage, tests, and the additional QA check.
@@ -35,7 +35,6 @@
 - Link to the SemVer release mapped to the Assignment 4 Sprint increment.
 - [CHANGELOG](/CHANGELOG.md)
 - Public sanitized demo video shorter than two minutes.
-- Optional link to `reports/week4/presentation.pdf` if the team publishes a sanitized public copy of the presentation slides.
 -  Public sanitized UAT results summary.
 - [Meeting transcript](/reports/week4/customer-review-transcript.md)
 -  [Meeting summary](/reports/week4/customer-review-summary.md)
