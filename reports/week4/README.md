@@ -30,8 +30,8 @@
    - QR‑002 – Traffic Processor startup time	Time behaviour
    - QR‑003 – Traffic Processor throughput capacity	Performance efficiency
 - Testing status summary, including critical modules and per-module line coverage status.
-   - Unit Tests: src/test_TP+CN.py
-   - Quality Requirement Tests: src/qr_test.py
+   - Unit Tests: [test_TP+CN.py](/src/Traffic_Processor/test_TP+CN.py)
+   - Quality Requirement Tests: [qr_test.py](/src/qr_test.py)
    - Coverage Report: Generated in CI as coverage-report artifact
    - CI Test Logs: [Available in GitHub Actions workflow runs](https://github.com/SWP-Team-46/Traffic-Proccessor/actions/runs/28325503855/job/83914700451)
 - [TP unit tests](/src/Traffic_Processor/test_TP+CN.py)
