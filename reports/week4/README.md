@@ -36,7 +36,7 @@
    - CI Test Logs: [Available in GitHub Actions workflow runs](https://github.com/SWP-Team-46/Traffic-Proccessor/actions/runs/28325503855/job/83914700451)
 - [TP unit tests](/src/Traffic_Processor/test_TP+CN.py)
 - [Integration tests](/src/cnss/tests/cnss_test.py)
-- Automated quality requirement tests [description](https://github.com/SWP-Team-46/Traffic-Proccessor/blob/main/docs/quality-requirement-tests.md), [code](https://github.com/SWP-Team-46/Traffic-Proccessor/blob/main/src/qr_test.py).
+- [Quality requirement tests](/src/qr_test.py)
 - [CI pipeline](/.github/workflows/main.yml)
 - [Protected-default-branch CI run](https://github.com/SWP-Team-46/Traffic-Proccessor/actions/runs/28325503855)
 - Main is protected by the following ruleset:
