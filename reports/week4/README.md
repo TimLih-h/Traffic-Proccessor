@@ -81,7 +81,7 @@ No blocking issues were observed; only minor improvements to UAT‑003 instructi
 
 - Embedded screenshots from `reports/week4/images/` for:
 
-  ![Sprint milestone](./images/Milestone.jpg)
+  ![Milestone](./images/Milestone.jpg)
       Latest protected-default-branch CI run
     * Branch protection or rules evidence
     * Coverage or test report
