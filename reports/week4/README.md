@@ -45,7 +45,7 @@
   - Require conversation resolution before merging
   - Require 1 approval
 - Screenshots or report links for linting, coverage, tests, and the additional QA check.
-- The CI pipeline, test suite, and coverage thresholds established in Assignment 4 will become mandatory gates for every future pull request—blocking merges if linting, unit tests, or coverage requirements fail. As new features are added, the test suite must grow alongside them to prevent regressions and maintain the coverage baseline. Finally, the Definition of Done will formally tie story completion to passing all CI checks and smoke tests, ensuring that "done" always means "production-ready"
+- The CI pipeline, test suite, and coverage thresholds established in Assignment 4 will become mandatory gates for every future pull request blocking merges if linting, unit tests, or coverage requirements fail. As new features are added, the test suite must grow alongside them to prevent regressions and maintain the coverage baseline. Finally, the Definition of Done will formally tie story completion to passing all CI checks and smoke tests, ensuring that "done" always means "production-ready"
 - [v1.1.0](https://github.com/SWP-Team-46/Traffic-Proccessor/releases/tag/1.1.0)
 - [CHANGELOG](/CHANGELOG.md)
 - Public sanitized demo video shorter than two minutes.
