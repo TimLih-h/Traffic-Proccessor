@@ -10,6 +10,7 @@ ERROR_SERVER = "http://error-server:5000"
 # It is empty for now, so all IPs are allowed.
 BLOCKED_IPS = {
     "172.19.0.1"
+    "10.241.1.122"
 }
 
 
