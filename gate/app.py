@@ -8,7 +8,9 @@ ERROR_SERVER = "http://error-server:5000"
 
 # Blocked IP list.
 # It is empty for now, so all IPs are allowed.
-BLOCKED_IPS = set()
+BLOCKED_IPS = {
+    "172.19.0.1"
+}
 
 
 def get_client_ip():
