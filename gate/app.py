@@ -6,10 +6,7 @@ app = Flask(__name__, static_folder=None)
 MAIN_SERVER = "http://cnss:8080"
 ERROR_SERVER = "http://error-server:5000"
 
-BLOCKED_IPS = {
-        "172.19.0.0",
-    "10.241.1.120"
-}
+BLOCKED_IPS = set()
 
 
 def proxy_request(target_server):
