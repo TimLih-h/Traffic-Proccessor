@@ -1,7 +1,7 @@
 from flask import Flask, request, Response
 import requests
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder=None)
 
 MAIN_SERVER = "http://cnss:8080"
 ERROR_SERVER = "http://error-server:5000"
