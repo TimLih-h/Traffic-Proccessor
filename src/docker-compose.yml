@@ -21,7 +21,7 @@ services:
     command: >
       python tproc.py
       --interface eth0
-      --output /data/data.txt
+      --url http://cnss:8080
     networks:
       - swp-net
     restart: unless-stopped
