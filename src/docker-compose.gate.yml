@@ -11,10 +11,9 @@ services:
       dockerfile: Dockerfile
     container_name: gate
     ports:
-      - "8081:8080"
+      - "8080:8080"
     depends_on:
       - cnss
-      - error-server
     networks:
       - swp-net
     restart: unless-stopped
