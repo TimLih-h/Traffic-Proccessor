@@ -31,3 +31,8 @@ services:
     networks:
       - swp-net
     restart: unless-stopped
+
+networks:
+  swp-net:
+    external: true
+    name: swp-net    # explicitly use the existing network

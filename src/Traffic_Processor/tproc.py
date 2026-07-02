@@ -8,7 +8,7 @@ from scapy.all import sniff, TCP, UDP, ICMP, IP, Ether
 from urllib import request, error
 
 class TrafficProcessor:
-    def __init__(self, interface="any", output_url="http://localhost:8000", delay=0.5):
+    def __init__(self, interface="eth0", output_url="http://cnss:8080", delay=0.5):
         self.interface = interface
         self.output_url = output_url
         self.delay = delay
@@ -178,8 +178,8 @@ class TrafficProcessor:
 
 def main():
     parser = argparse.ArgumentParser(description="Traffic Processor")
-    parser.add_argument("-i", "--interface", type=str, default="any", help="Network interface to capture from (default: any), may affect direction tracking")
-    parser.add_argument("-u", "--url", type=str, default="http://localhost:8000", help="HTTP endpoint URL to POST batches to")
+    parser.add_argument("-i", "--interface", type=str, default="eth0", help="Network interface to capture from (default: any), may affect direction tracking")
+    parser.add_argument("-u", "--url", type=str, default="http://cnss:8080", help="HTTP endpoint URL to POST batches to")
     parser.add_argument("-d", "--delay", type=float, default=0.5, help="Delay in seconds between loop iterations (default 0.5)")
     args = parser.parse_args()
     
