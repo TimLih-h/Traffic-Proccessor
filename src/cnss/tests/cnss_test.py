@@ -19,7 +19,7 @@ def test_insert_packets_info():
         "icmp_packets": 1200,
         "other_packets": 334,
         "top_ips": [],
-        "status": "normal"
+        "status": "online"
     }
     response = client.post("/load", json=payload)
     assert response.status_code == 200
@@ -42,7 +42,7 @@ def test_obtain_packet_info():
         "icmp_packets": 1200,
         "other_packets": 334,
         "top_ips": [],
-        "status": "normal"
+        "status": "online"
     }
     client.post("/load", json=payload)
     
