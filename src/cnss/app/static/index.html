@@ -4,49 +4,134 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Traffic Processor</title>
-    <link rel="stylesheet" href="./styles.css?v=2" />
+    <link rel="stylesheet" href="./styles.css?v=12" />
   </head>
   <body>
-    <main class="page">
-      <section class="panel" aria-live="polite">
-        <span class="diode" id="status-diode" title="Traffic processor status"></span>
-        <p class="label" id="primary-label">Bytes per second</p>
-        <div class="primary-value" id="primary-value">0</div>
-        <p class="rate" id="rate-value">0 total bytes</p>
+    <main class="app-shell">
+      <section class="terminal-panel" aria-live="polite">
+        <div class="content-layout">
+          <aside class="control-rail" aria-label="Traffic controls">
+            <div class="brand">
+              <span class="diode" id="status-diode" title="Traffic processor status"></span>
+              <h1 id="view-title">Traffic Processor</h1>
+            </div>
 
-        <div class="direction-stats" id="bytes-direction-stats">
-          <div>
-            <span>Incoming bytes</span>
-            <strong id="incoming-bytes">0 B</strong>
-          </div>
-          <div>
-            <span>Outgoing bytes</span>
-            <strong id="outgoing-bytes">0 B</strong>
-          </div>
-        </div>
+            <nav class="view-tabs" aria-label="Traffic views">
+              <button class="view-tab active" type="button" data-view="dashboard">Overview</button>
+              <button class="view-tab" type="button" data-view="table">Table</button>
+            </nav>
 
-        <div class="direction-stats" id="packet-direction-stats" hidden>
-          <div>
-            <span>Incoming packets</span>
-            <strong id="incoming-packets">0</strong>
-          </div>
-          <div>
-            <span>Outgoing packets</span>
-            <strong id="outgoing-packets">0</strong>
-          </div>
-        </div>
+            <p class="updated sidebar-updated">
+              Last updated: <span id="last-updated">--:--:--</span>
+            </p>
+          </aside>
 
-        <div class="packet-types" id="packet-types" hidden>
-          <div>TCP <strong id="tcp-packets">0</strong></div>
-          <div>UDP <strong id="udp-packets">0</strong></div>
-          <div>ICMP <strong id="icmp-packets">0</strong></div>
-          <div>Other <strong id="other-packets">0</strong></div>
+          <div class="views-area">
+            <section class="view active" id="dashboard-view">
+              <div class="dashboard-layout">
+                <div class="metrics-column">
+                  <div class="metric-cards">
+                    <article class="metric-card">
+                      <div class="metric-heading">
+                        <span id="incoming-rate-label">Incoming Packets / s</span>
+                      </div>
+                      <strong class="metric-value" id="incoming-rate">0</strong>
+                      <div class="card-rule"></div>
+                      <p class="metric-total-label" id="incoming-total-label">Total packets</p>
+                      <p class="metric-total" id="incoming-total">0</p>
+                    </article>
+
+                    <article class="metric-card">
+                      <div class="metric-heading">
+                        <span id="outgoing-rate-label">Outgoing Packets / s</span>
+                      </div>
+                      <strong class="metric-value" id="outgoing-rate">0</strong>
+                      <div class="card-rule"></div>
+                      <p class="metric-total-label" id="outgoing-total-label">Total packets</p>
+                      <p class="metric-total" id="outgoing-total">0</p>
+                    </article>
+                  </div>
+
+                  <div class="protocol-row" aria-label="Protocol packet totals">
+                    <div class="protocol-tile">
+                      <span>TCP</span>
+                      <strong id="tcp-packets">0</strong>
+                    </div>
+                    <div class="protocol-tile">
+                      <span>UDP</span>
+                      <strong id="udp-packets">0</strong>
+                    </div>
+                    <div class="protocol-tile">
+                      <span>ICMP</span>
+                      <strong id="icmp-packets">0</strong>
+                    </div>
+                    <div class="protocol-tile">
+                      <span>Other</span>
+                      <strong id="other-packets">0</strong>
+                    </div>
+                  </div>
+                </div>
+
+                <aside class="dashboard-controls" aria-label="Dashboard controls">
+                  <div class="metric-toggle" role="group" aria-label="Metric type">
+                    <button class="toggle-button active" type="button" data-metric="packets">Packets</button>
+                    <button class="toggle-button" type="button" data-metric="bytes">Bytes</button>
+                  </div>
+                  <button class="reset-button" id="reset-button" type="button">Reset</button>
+                </aside>
+              </div>
+
+              <section class="chart-panel">
+                <div class="chart-header">
+                  <h2 id="chart-title">Packets Per Second</h2>
+                  <div class="legend">
+                    <span><i class="legend-line solid"></i>Incoming</span>
+                    <span><i class="legend-line dashed"></i>Outgoing</span>
+                  </div>
+                </div>
+                <canvas id="traffic-chart" height="360" aria-label="Traffic rate chart"></canvas>
+              </section>
+            </section>
+
+            <section class="view" id="table-view">
+              <div class="table-toolbar">
+                <button class="toolbar-button" type="button" id="refresh-button">Refresh</button>
+                <button class="toolbar-button" type="button" id="export-button">Export</button>
+              </div>
+
+              <div class="table-wrap">
+                <table class="talkers-table">
+                  <thead>
+                    <tr>
+                      <th>IP</th>
+                      <th>Packets v</th>
+                      <th>Bytes v</th>
+                      <th>In/Out</th>
+                      <th>Top Protocols</th>
+                      <th>Top Ports</th>
+                      <th>Action</th>
+                    </tr>
+                  </thead>
+                  <tbody id="talkers-body"></tbody>
+                </table>
+              </div>
+
+              <footer class="table-footer">
+                <span id="table-summary">Showing 0 to 0 of 0 entries</span>
+                <nav class="pagination" aria-label="Table pages">
+                  <button type="button" disabled>&lt;</button>
+                  <button class="active" type="button">1</button>
+                  <button type="button">2</button>
+                  <button type="button">3</button>
+                  <button type="button">&gt;</button>
+                </nav>
+              </footer>
+            </section>
+          </div>
         </div>
       </section>
-
-      <button class="mode-button" id="mode-button" type="button">Show packets</button>
     </main>
 
-    <script src="./app.js?v=2"></script>
+    <script src="./app.js?v=12"></script>
   </body>
 </html>
