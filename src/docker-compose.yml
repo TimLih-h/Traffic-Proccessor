@@ -19,7 +19,7 @@ services:
     environment:
       - PYTHONUNBUFFERED=1
     command: >
-      python tproc.py -i eth0
+      python tproc.py -i eth0 --url http://cnss:8080/load
     depends_on:
       - gate
     restart: unless-stopped
