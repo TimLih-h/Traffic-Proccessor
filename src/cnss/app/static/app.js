@@ -365,10 +365,8 @@ function normalizeTalkers(payload) {
   }
 
   return rows.slice(0, PAGE_SIZE).map((row, index) => {
-    const incoming = positive(row.incoming_packets ?? row.in_packets ?? row.input_packets ?? row.in ?? 0);
-    const outgoing = positive(
-      row.outgoing_packets ?? row.out_packets ?? row.output_packets ?? row.out ?? 0,
-    );
+    const incoming = positive(row.incoming ?? row.in_packets ?? row.input_packets ?? 0);
+    const outgoing = positive(row.outgoing ?? row.out_packets ?? row.output_packets ?? 0);
     const packets = positive(row.packets ?? row.total_packets ?? row.totalPackets ?? incoming + outgoing);
     const bytes = positive(row.bytes ?? row.total_bytes ?? row.totalBytes ?? 0);
 

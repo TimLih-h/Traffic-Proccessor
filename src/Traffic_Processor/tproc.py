@@ -3,6 +3,7 @@ import json
 import argparse
 import threading
 import netifaces
+import socket
 import os
 from datetime import datetime
 from collections import defaultdict
@@ -15,11 +16,12 @@ class IPTracker:
     Tracks per-IP statistics with a rolling window.
     Thread-safe with RLock.
     """
-    def __init__(self, window_seconds=60, max_ips=1000):
+    def __init__(self, window_seconds=60, max_ips=1000, ignore_ips=None):
         self.window = window_seconds
         self.max_ips = max_ips
         self.data = {}
         self.lock = threading.RLock()
+        self.ignore_ips = set(ignore_ips) if ignore_ips else set()
 
     def update(self, src_ip, dst_ip, size, proto, sport=None, dport=None):
         """Update statistics for a single packet."""
@@ -32,6 +34,8 @@ class IPTracker:
 
     def _update_single_ip(self, ip, size, direction, proto, sport, dport, now):
         """Update a single IP entry."""
+        if ip in self.ignore_ips:
+            return
         if ip not in self.data:
             self.data[ip] = {
                 "total_packets": 0,
@@ -152,43 +156,50 @@ class TrafficProcessor:
         self.last_bytes_cnt = 0
         self.last_update_time = time.time()
 
-   
-        # IPs to ignore (gate's own management traffic)
-        self.filter_ips = set()
+
+        # Resolve CNSS IP
+        self.cnss_ip = None
+        cnss_hostname = os.environ.get("CNSS_HOSTNAME", "cnss")
+        try:    
+            self.cnss_ip = socket.gethostbyname(cnss_hostname)
+            print(f"[TP] Resolved CNSS hostname '{cnss_hostname}' -> {self.cnss_ip}")
+        except socket.gaierror:
+            self.cnss_ip = os.environ.get("CNSS_IP")
+            if self.cnss_ip:
+                print(f"[TP] Using CNSS_IP from environment: {self.cnss_ip}")
+            else:
+                print("[TP] WARNING: CNSS IP not resolved – monitoring traffic may slip through.")
+
 
         # Get the gate's own IP from the interface
-        self.local_ip = None
-        self.local_mac = None
+        self.gate_ip = None
+        self.target_ip = None
         if interface != "any":
             try:
                 addrs = netifaces.ifaddresses(interface)
                 ipv4 = addrs.get(netifaces.AF_INET, [])
                 if ipv4:
-                    self.local_ip = ipv4[0]['addr']
-                    self.filter_ips.add(self.local_ip)
-                mac = addrs.get(netifaces.AF_LINK, [])
-                if mac:
-                    self.local_mac = mac[0]['addr']
-                print(f"[TP] Local IP: {self.local_ip}, MAC: {self.local_mac}")
+                    self.gate_ip = ipv4[0]['addr']
+                print(f"[TP] Gate IP: {self.gate_ip}")
+
             except Exception as e:
                 print(f"[TP] Could not get interface info: {e}")
         else:
             print("[TP] Using 'any' interface - direction classification may be unreliable.")
 
-        # Allow the user to specify additional IPs to filter via environment variable
-        extra_ips = os.environ.get("FILTER_IPS", "")
-        if extra_ips:
-            for ip in extra_ips.split(","):
-                ip = ip.strip()
-                if ip:
-                    self.filter_ips.add(ip)
-                    print(f"[TP] Added extra filter IP: {ip}")
-
-        if self.filter_ips:
-            print(f"[TP] Filtering out packets from: {', '.join(self.filter_ips)}")
+        target_hostname = os.environ.get("TARGET_HOSTNAME", "mock_target")
+        try:
+            self.target_ip = socket.gethostbyname(target_hostname)
+            print(f"[TP] Resolved target hostname '{target_hostname}' -> {self.target_ip}")
+        except socket.gaierror:
+            self.target_ip = os.environ.get("TARGET_IP")
+            if self.target_ip:
+                print(f"[TP] Using TARGET_IP from environment: {self.target_ip}")
+            else:
+                print("[TP] WARNING: target IP not resolved – outgoing counts will be incorrect.")
 
         # Per-IP tracker
-        self.ip_tracker = IPTracker(window_seconds=60, max_ips=1000)
+        self.ip_tracker = IPTracker(window_seconds=60, max_ips=1000, ignore_ips={self.gate_ip} if self.gate_ip else None)
 
         self.running = False
         self.sender_thread = None
@@ -200,18 +211,17 @@ class TrafficProcessor:
             if packet.haslayer(IP):
                 src_ip = packet[IP].src
                 dst_ip = packet[IP].dst
-                # If the SOURCE is the gate, it's outgoing management traffic is IGNORED
-                if src_ip in self.filter_ips:
-                    return
                 # If the DESTINATION is the gate:
                 # We only ignore it if it's on a management port (DNS, CNSS API).
                 is_management = False
+                if self.cnss_ip and (src_ip == self.cnss_ip or dst_ip == self.cnss_ip):
+                    return
                 if packet.haslayer(TCP):
                     # (SSH=22, DNS=53, CNSS=8080)
-                   if packet[TCP].dport in {53, 8000, 8080}:
+                   if packet[TCP].dport in {53, 8000} or packet[TCP].sport in {53, 8000}:
                         is_management = True
                 elif packet.haslayer(UDP):
-                    if packet[UDP].dport in {53}:
+                    if packet[UDP].dport in {53} or packet[UDP].sport in {53}:
                         is_management = True
                 if is_management:
                    return
@@ -241,24 +251,15 @@ class TrafficProcessor:
                 self.other_cnt += 1
 
             # Direction classification
-            if self.local_ip:
-                if packet.haslayer(IP):
-                    ip = packet[IP]
-                    if ip.dst == self.local_ip:
-                        self.incoming_packets += 1
-                        self.incoming_bytes += len(packet)
-                    elif ip.src == self.local_ip:
-                        self.outgoing_packets += 1
-                        self.outgoing_bytes += len(packet)
-            elif self.local_mac and packet.haslayer(Ether):
-                eth = packet[Ether]
-                if eth.dst == self.local_mac:
-                    self.incoming_packets += 1
-                    self.incoming_bytes += len(packet)
-                elif eth.src == self.local_mac:
+            if packet.haslayer(IP):
+                ip = packet[IP]
+                if ip.src == self.target_ip:
                     self.outgoing_packets += 1
                     self.outgoing_bytes += len(packet)
-
+                elif ip.dst == self.gate_ip:
+                    self.incoming_packets += 1
+                    self.incoming_bytes += len(packet)
+                    
             # Update per-IP tracker
             if packet.haslayer(IP):
                 ip_layer = packet[IP]
