@@ -63,17 +63,12 @@ docker compose up --build
 
 This starts all six services. The dashboard is available at `http://localhost:8080`, and the protected target is accessible via the gate at `http://localhost:8000`.
 
-To verify that TP is running:
-
-```bash
-docker exec tproc cat /data/data.txt | head -3
-```
 
 ---
 
-## Summary of Upgrades from Assignment-5 to `dev`
+## Summary of Upgrades of sprint-3
 
-| Aspect | Assignment-5 | dev |
+| Aspect | before | after |
 |--------|--------------|-----|
 | **Components** | TP + CNSS | TProc + Gate + Mock Target + Error Server + CNSS + PostgreSQL |
 | **Storage** | In-memory (PostgreSQL planned) | PostgreSQL (active) |
