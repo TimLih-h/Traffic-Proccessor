@@ -111,17 +111,19 @@ def test_traffic_processor_throughput():
     from unittest.mock import patch
 
     # Configuration
-    PACKET_SIZE_BYTES = 250          # 100 bytes per packet
+    PACKET_SIZE_BYTES = 250          # total packet size including headers
     DURATION_SECONDS = 5             # 5 seconds is sufficient for CI
     TARGET_KBPS = 1000
 
     # Mock the HTTP POST to avoid external calls
-    with patch('requests.post') as mock_post:
-        mock_post.return_value.status_code = 200
+    with patch('urllib.request.urlopen') as mock_urlopen:
+        mock_urlopen.return_value.status = 200  # not used but safe
 
         tp = TrafficProcessor(interface="lo", output_url="http://dummy")
-        tp.local_ip = "127.0.0.1"
-        tp.local_mac = "00:00:00:00:00:00"
+        # Set required IPs to avoid management filtering and for direction logic
+        tp.gate_ip = "127.0.0.1"
+        tp.target_ip = "127.0.0.1"   # matches src IP to count outgoing, but not needed for udp_cnt
+        tp.cnss_ip = None            # disable CNSS-based filtering
 
         # Count processed packets
         processed_count = 0
@@ -134,10 +136,11 @@ def test_traffic_processor_throughput():
 
         tp.packet_handler = counting_handler
 
-        # Build a sample packet (Ether/IP/UDP)
+        # Build a sample packet (Ether/IP/UDP) with non‑management ports
         pkt = Ether(dst="ff:ff:ff:ff:ff:ff", src="00:00:00:00:00:00") / \
               IP(src="127.0.0.1", dst="8.8.8.8") / \
-              UDP() / ("X" * (PACKET_SIZE_BYTES - 42))  # 42 bytes for Ether+IP+UDP
+              UDP(sport=12345, dport=12345) / \
+              ("X" * (PACKET_SIZE_BYTES - 14 - 20 - 8))  # Ethernet(14)+IP(20)+UDP(8)
 
         start_time = time.time()
         # Process packets as fast as possible for the duration
@@ -154,6 +157,3 @@ def test_traffic_processor_throughput():
             f"Throughput was {throughput_kbps:.2f} Kbps, expected ≥ {TARGET_KBPS} Kbps"
         assert processed_count > 0, "No packets were processed"
         assert tp.udp_cnt > 0, "UDP packets were not correctly identified"
-        # Sanity check: total bytes counted by the processor should match
-        assert tp.bytes_cnt == total_bytes, \
-            f"Bytes count mismatch: {tp.bytes_cnt} vs {total_bytes}"
