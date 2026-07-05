@@ -1,126 +1,28 @@
 @startuml
-' Component Diagram - Traffic Processor System
+!include <C4/C4_Component>
+!include <C4/C4_Context>
 
-title Component Diagram – Traffic Processor System (dev branch)
+title Component Diagram – Traffic Processor System
 
-' ---------- Deployment Nodes (Docker Host & Compose) ----------
-node "Docker Host\n[Linux/Windows/macOS]" as docker_host <<node>> {
-    node "Docker Compose\n[Orchestrates containers]" as compose <<node>> {
+Person(end_user, "End User", "Accesses the web dashboard and the protected target")
 
-        ' ---------- Container: gate ----------
-        component "gate\n[Docker]\nReverse Proxy with IP Filtering" as gate <<container>> {
-            component "Request Interceptor" as req_interceptor <<HTTP Handler>> {
-                ' no inner components
-            }
-            component "IP Access Filter" as ip_filter <<Core Logic>> {
-                ' no inner components
-            }
-            component "Reverse Proxy" as proxy_fwd <<requests>> {
-                ' no inner components
-            }
-            component "Error Page" as error_page <<HTTP>> {
-                ' no inner components
-            }
-        }
-
-        ' ---------- Container: tproc ----------
-        component "tproc\n[Docker]\nTraffic Processor – Packet capture and statistics" as tproc <<container>> {
-            component "Packet Sniffer" as packet_sniffer <<Scapy>> {
-                ' no inner components
-            }
-            component "IPTracker" as ip_tracker <<Core Logic>> {
-                ' no inner components
-            }
-            component "Stats Builder" as stats_builder <<Pydantic>> {
-                ' no inner components
-            }
-            component "HTTP Sender" as http_sender <<requests>> {
-                ' no inner components
-            }
-        }
-
-        ' ---------- Container: mock_target ----------
-        component "mock_target\n[Docker]\nProtected application (internal)" as mock_target <<container>> {
-            component "Application Logic" as app_logic <<Python>> {
-                ' no inner components
-            }
-        }
-
-        ' ---------- Container: error_server ----------
-        component "error_server\n[Docker]\nBlocked IP error page" as error_server <<container>> {
-            ' error_page is already defined inside gate (since it's served from gate)
-            ' We'll keep it outside because gate uses it.
-        }
-
-        ' ---------- Container: cnss ----------
-        component "cnss\n[Docker]\nControl and Status Server – FastAPI + Static UI" as cnss <<container>> {
-            component "API Router" as api_router <<FastAPI>> {
-                ' no inner components
-            }
-            component "Load Controller" as stats_load <<Controller>> {
-                ' no inner components
-            }
-            component "Get Controller" as stats_get <<Controller>> {
-                ' no inner components
-            }
-            component "Reset Controller" as reset_ctrl <<Controller>> {
-                ' no inner components
-            }
-            component "Static Web Server" as static_web <<FastAPI>> {
-                ' no inner components
-            }
-            component "Persistence Layer" as db_repo <<SQLAlchemy>> {
-                ' no inner components
-            }
-        }
-
-        ' ---------- Container: db ----------
-        component "db\n[PostgreSQL]\nPersistent storage for traffic statistics" as db <<container>> {
-            component "DB Engine" as db_engine <<SQL>> {
-                ' no inner components
-            }
-        }
-    }
+System_Boundary(tp_system, "Traffic Processor System") {
+    Component(tproc, "TProc", "Python / Scapy", "Captures packets, tracks per-IP stats, sends to CNSS")
+    Component(gate, "Gate", "Python / HTTP Proxy", "Reverse proxy with IP filtering; blocks suspicious IPs")
+    Component(error_server, "Error Server", "Flask", "Serves access-denied page for blocked IPs")
+    Component(mock_target, "Mock Target", "Flask", "Protected application behind the gate")
+    Component(cnss, "CNSS", "FastAPI", "Receives stats, serves dashboard, supports reset")
+    Component(postgres, "PostgreSQL", "PostgreSQL 14.8", "Persistent storage for CNSS")
 }
 
-' ---------- External Nodes ----------
-node "Network\n[External]" as network <<node>> {
-    component "Network Interface" as net_iface <<Live traffic>> {
-        ' no inner components
-    }
-}
+System_Ext(network, "Network Interface", "Live packet source")
 
-node "End User Device\n[Browser]" as user_node <<node>> {
-    component "End User" as end_user <<Browser>> {
-        ' no inner components
-    }
-}
-
-' ----- External connections (same as your deployment diagram) -----
-net_iface --> gate : "Captures packets via\nRaw socket (host network)"
-gate --> tproc : "Routes traffic to\nInternal network"
-tproc --> cnss : "Sends statistics via\nHTTP POST (port 8080)"
-cnss --> db : "Stores/retrieves data via\nSQL (port 5432)"
-end_user --> gate : "Accesses dashboard via\nHTTP (port 8000)"
-gate --> mock_target : "Proxies allowed traffic to\nInternal (port 5000)"
-gate --> error_server : "Serves block page from\nInternal (port 5000)"
-
-' ----- Internal component relationships (this makes it a Component diagram) -----
-
-' Inside tproc
-packet_sniffer --> ip_tracker : "Updates per‑IP counts\n(in/out, protocols)"
-ip_tracker --> stats_builder : "Aggregates top IPs\nand port details"
-stats_builder --> http_sender : "Serialises NetworkStats\nto JSON"
-
-' Inside gate
-req_interceptor --> ip_filter : "Validates source IP"
-ip_filter --> proxy_fwd : "Forwards request\nif IP is not blocked" <<allowed>>
-ip_filter --> error_page : "Returns 403\nif IP is blocked" <<denied>>
-
-' Inside cnss
-stats_load --> db_repo : "Upserts the latest snapshot"
-stats_get --> db_repo : "Fetches the latest snapshot"
-reset_ctrl --> db_repo : "Updates the baseline snapshot"
-static_web --> stats_get : "Calls /packets via\nAJAX"
+Rel(network, tproc, "Captures packets from", "Raw socket (NET_ADMIN)")
+Rel(tproc, cnss, "Sends statistics via", "HTTP POST /load")
+Rel(cnss, postgres, "Persists data via", "SQL / Alembic")
+Rel(end_user, gate, "Accesses protected target via", "HTTP (port 8000)")
+Rel(gate, mock_target, "Proxies allowed requests to", "HTTP")
+Rel(gate, error_server, "Forwards blocked requests to", "HTTP (error page)")
+Rel(end_user, cnss, "Accesses dashboard via", "HTTP (port 8080)")
 
 @enduml
