@@ -1,0 +1,53 @@
+@startuml
+!theme plain
+title Traffic Processor System – Component Diagram (Static View)
+
+package "Traffic Processor System" {
+  
+  package "Traffic Capture" {
+    [TProc] as tproc
+    () "Raw Socket" as net_iface
+    () "HTTP POST /load" as load_api
+  }
+  
+  package "Access Control" {
+    [Gate] as gate
+    [Mock Target] as mock_target
+    [Error Server] as error_server
+    () "HTTP Proxy" as proxy_api
+  }
+  
+  package "Control & Status" {
+    [CNSS] as cnss
+    () "GET /packets" as get_api
+    () "POST /reset" as reset_api
+  }
+  
+  package "Data Layer" {
+    [PostgreSQL] as postgres
+    () "SQL / Alembic" as sql_api
+  }
+}
+
+' External interfaces
+() "Live Network Traffic" as network
+() "Dashboard Access" as dashboard
+
+network --> net_iface
+net_iface --> tproc : captures
+tproc --> load_api
+load_api --> cnss : sends stats
+
+' Client access
+dashboard --> cnss : HTTP
+network --> gate : HTTP
+
+' Gate routing
+gate --> proxy_api
+proxy_api --> mock_target : if allowed
+proxy_api --> error_server : if blocked
+
+' Persistence
+cnss --> sql_api
+sql_api --> postgres : persists
+@enduml
