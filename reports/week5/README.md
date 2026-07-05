@@ -14,36 +14,43 @@
 6. Add traffic gate, added per-IP data to be displayed, UI changes, backend changes
 7. Link to the relevant [product access artifact](http://147.45.234.218:8080)
 8. [Run instructions](/README.md)
-9. Customer feedback response table with feedback points and resulting PBIs or issues - not done
-10. All the provided feedback was addressed
-11. [Roadmap](/docs/roadmap.md)
-12. [Definition of done](/docs/definition-of-done.md)
-13. [Testing](/docs/testing.md)
-14. [Quality requirements](/docs/quality-requirements.md)
-15. [Quality requirements tests](/docs/quality-requirement-tests.md)
-16. [User acceptance tests](/docs/user-acceptance-tests.md)
-17. [Development proccess](/docs/development-process.md)
-18. [Architecture](/docs/architecture/README.md)
-19. [Static](/docs/architecture/static-view), [Dynamic](/docs/architecture/dynamic-view), [Deployment](/docs/architecture/deployment-view)
-20. [ADR directory](/docs/architecture/adr)
-21. The Traffic Processor (packet sniffer) and CNSS (FastAPI dashboard) communicate asynchronously via HTTP, enabling real‑time visibility while keeping components loosely coupled and deployable via Docker Compose
-22. Asynchronous HTTP and in‑memory storage (ADR‑001/002) ensure sub‑second dashboard updates; Scapy (ADR‑003) keeps startup fast and throughput adequate
-23. CI runs linting, unit/integration tests, coverage (≥30% threshold), Docker build, and a smoke test; the latest run passed
-24. [CI pipeline](/.github/workflows/main.yml)
-25. [latest protected-default-branch CI run](https://github.com/SWP-Team-46/Traffic-Proccessor/actions) <!--Finish the link-->
-26. [MVP v2 release](https://github.com/SWP-Team-46/Traffic-Proccessor/releases/tag/2.0.0)
-27. [Changelog](/CHANGELOG.md)
-28. Public sanitized demo video shorter than two minutes - not done
-29. All four UAT tests (UAT-001, UAT-002, UAT-003, and UAT-004) executed during Sprint 2 passed successfully, covering live traffic statistics, Docker Compose operation, directional packet classification, and the additional validation introduced in the assignment-5 branch, the customer reported no critical issues
-30. Link to the hosted documentation site - not done
-31. [Sprint Review transcript](/reports/week5/sprint-review-transcript.md)
-32. [Sprint review summary](reports/week5/sprint-review-summary.md)
-33. [Reflection](reports/week5/reflection.md)
-34. [Retrospective](reports/week5/retrospective.md)
-35. [LLM report](reports/week5/llm-report.md)
-36. The main branch delivers a working Traffic Processor with packet capture, CNSS dashboard, blocking, tunneling, and separate in/out counters
-37. Polishing, stresstesting, improving throughtput, add more statistics and ability to export them
-38. Contribution traceability table mapping each team member to issues, PRs or MRs, review activity, testing, quality, automation, architecture, or documentation work
+9. Customer feedback response table with feedback points and resulting PBIs or issues
+
+| Customer Feedback | Resulting PBI / Issue |
+|-------------------|------------------------|
+| Customer suggested testing the software with real application | Find opensource docker application and test the software with it as a target |
+| Frontend block buttons are non‑functional. | Implement missing buttons functionality to enable full UI interaction. |
+| Cutomer wants to know max throughput capability. | Implement stresstests to check not only the lowerbound, but the upperbounds to. |
+
+11. All the provided feedback was addressed
+12. [Roadmap](/docs/roadmap.md)
+13. [Definition of done](/docs/definition-of-done.md)
+14. [Testing](/docs/testing.md)
+15. [Quality requirements](/docs/quality-requirements.md)
+16. [Quality requirements tests](/docs/quality-requirement-tests.md)
+17. [User acceptance tests](/docs/user-acceptance-tests.md)
+18. [Development proccess](/docs/development-process.md)
+19. [Architecture](/docs/architecture/README.md)
+20. [Static](/docs/architecture/static-view), [Dynamic](/docs/architecture/dynamic-view), [Deployment](/docs/architecture/deployment-view)
+21. [ADR directory](/docs/architecture/adr)
+22. The Traffic Processor (packet sniffer) and CNSS (FastAPI dashboard) communicate asynchronously via HTTP, enabling real‑time visibility while keeping components loosely coupled and deployable via Docker Compose
+23. Asynchronous HTTP and in‑memory storage (ADR‑001/002) ensure sub‑second dashboard updates; Scapy (ADR‑003) keeps startup fast and throughput adequate
+24. CI runs linting, unit/integration tests, coverage (≥30% threshold), Docker build, and a smoke test; the latest run passed
+25. [CI pipeline](/.github/workflows/main.yml)
+26. [latest protected-default-branch CI run](https://github.com/SWP-Team-46/Traffic-Proccessor/actions) <!--Finish the link-->
+27. [MVP v2 release](https://github.com/SWP-Team-46/Traffic-Proccessor/releases/tag/2.0.0)
+28. [Changelog](/CHANGELOG.md)
+29. Public sanitized demo video shorter than two minutes - not done
+30. All four UAT tests (UAT-001, UAT-002, UAT-003, and UAT-004) executed during Sprint 2 passed successfully, covering live traffic statistics, Docker Compose operation, directional packet classification, and the additional validation introduced in the assignment-5 branch, the customer reported no critical issues
+31. Link to the hosted documentation site - not done
+32. [Sprint Review transcript](/reports/week5/sprint-review-transcript.md)
+33. [Sprint review summary](reports/week5/sprint-review-summary.md)
+34. [Reflection](reports/week5/reflection.md)
+35. [Retrospective](reports/week5/retrospective.md)
+36. [LLM report](reports/week5/llm-report.md)
+37. The main branch delivers a working Traffic Processor with packet capture, CNSS dashboard, blocking, tunneling, and separate in/out counters
+38. Polishing, stresstesting, improving throughtput, add more statistics and ability to export them
+39. Contribution traceability table mapping each team member to issues, PRs or MRs, review activity, testing, quality, automation, architecture, or documentation work
     
 | Team member | Issues / work items | Pull requests / merge requests | Review activity | Testing, quality, and automation work | Architecture and documentation work |
 |---|---|---|---|---|---|
