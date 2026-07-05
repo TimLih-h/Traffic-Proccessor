@@ -31,7 +31,7 @@
 23. CI runs linting, unit/integration tests, coverage (≥30% threshold), Docker build, and a smoke test; the latest run passed
 24. [CI pipeline](/.github/workflows/main.yml)
 25. [latest protected-default-branch CI run](https://github.com/SWP-Team-46/Traffic-Proccessor/actions) <!--Finish the link-->
-26. Link to the SemVer release mapped to `MVP v2`
+26. [MVP v2 release](https://github.com/SWP-Team-46/Traffic-Proccessor/releases/tag/2.0.0)
 27. [Changelog](/CHANGELOG.md)
 28. Public sanitized demo video shorter than two minutes
 29. Public sanitized UAT results summary
@@ -42,15 +42,14 @@
 34. [Retrospective](reports/week5/retrospective.md)
 35. [LLM report](reports/week5/llm-report.md)
 36. The main branch delivers a working Traffic Processor with packet capture, CNSS dashboard, blocking, tunneling, and separate in/out counters
-37. Summary of the next steps
-38. Contribution traceability table mapping each team member to issues, PRs or MRs, review activity, testing, quality, automation, architecture, or documentation work.
-39. Embedded screenshots from `reports/week5/images/` for:
+37. Polishing, stresstesting, improving throughtput, add more statistics and ability to export them
+38. Contribution traceability table mapping each team member to issues, PRs or MRs, review activity, testing, quality, automation, architecture, or documentation work
+
 
      ![Sprint milestone](/reports/week5/images/milestone.png)
      ![Board or project workflow view](/reports/week5/images/project_backboard.png)
      ![Latest protected-default-branch CI run](/reports/week5/images/CI_run.png)
-     ![SemVer release](/reports/week5/images/)
+     ![SemVer release](/reports/week5/images/release.png)
      ![Example reviewed issue-linked PR or MR](/reports/week5/images/reviewed_issue-linked_PR.png)
      ![Hosted docs site](/reports/week5/images/)
 
-42. Include product access artifact screenshots where relevant or where public links may not be inspectable by graders.
