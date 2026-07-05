@@ -3,9 +3,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/2.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+№№ [2.0.0] - 2026-07-05
+
+### Added
+
+- Per-IP statistics collection and display
+- Ability to block traffic based on a blacklist
+
+### Changed
+
+- Website UI overhaul
+
 ## [1.1.0] - 2026-06-28
 
 ### Added
+
 - Separate counters for incoming/outcoming patterns
 - README for use
 
@@ -16,6 +28,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.0.0] - 2026-06-25
 
 ### Added
+
 - Server that displays gathered statistics
 - Traffic Proccessor that collect amount of packets, packet/s
 - Communication Node, provides data from traffic proccessor to the server
