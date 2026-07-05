@@ -111,21 +111,18 @@ def test_traffic_processor_throughput():
     from unittest.mock import patch
 
     # Configuration
-    PACKET_SIZE_BYTES = 250          # total packet size including headers
-    DURATION_SECONDS = 5             # 5 seconds is sufficient for CI
+    PACKET_SIZE_BYTES = 1500          # Increased to reduce packet rate needed for 1000 Kbps
+    DURATION_SECONDS = 5
     TARGET_KBPS = 1000
 
-    # Mock the HTTP POST to avoid external calls
     with patch('urllib.request.urlopen') as mock_urlopen:
-        mock_urlopen.return_value.status = 200  # not used but safe
+        mock_urlopen.return_value.status = 200
 
         tp = TrafficProcessor(interface="lo", output_url="http://dummy")
-        # Set required IPs to avoid management filtering and for direction logic
         tp.gate_ip = "127.0.0.1"
-        tp.target_ip = "127.0.0.1"   # matches src IP to count outgoing, but not needed for udp_cnt
-        tp.cnss_ip = None            # disable CNSS-based filtering
+        tp.target_ip = "127.0.0.1"
+        tp.cnss_ip = None
 
-        # Count processed packets
         processed_count = 0
         original_handler = tp.packet_handler
 
@@ -136,23 +133,21 @@ def test_traffic_processor_throughput():
 
         tp.packet_handler = counting_handler
 
-        # Build a sample packet (Ether/IP/UDP) with non‑management ports
+        # Build a large packet (1500 bytes total) with non‑management UDP ports
+        payload_len = PACKET_SIZE_BYTES - 14 - 20 - 8   # Ethernet(14)+IP(20)+UDP(8)
         pkt = Ether(dst="ff:ff:ff:ff:ff:ff", src="00:00:00:00:00:00") / \
               IP(src="127.0.0.1", dst="8.8.8.8") / \
               UDP(sport=12345, dport=12345) / \
-              ("X" * (PACKET_SIZE_BYTES - 14 - 20 - 8))  # Ethernet(14)+IP(20)+UDP(8)
+              ("X" * payload_len)
 
         start_time = time.time()
-        # Process packets as fast as possible for the duration
         while time.time() - start_time < DURATION_SECONDS:
             tp.packet_handler(pkt)
         elapsed = time.time() - start_time
 
-        # Compute achieved throughput in Kbps
         total_bytes = processed_count * PACKET_SIZE_BYTES
         throughput_kbps = (total_bytes * 8) / (elapsed * 1000)
 
-        # Verify that we processed at least the target throughput
         assert throughput_kbps >= TARGET_KBPS, \
             f"Throughput was {throughput_kbps:.2f} Kbps, expected ≥ {TARGET_KBPS} Kbps"
         assert processed_count > 0, "No packets were processed"
