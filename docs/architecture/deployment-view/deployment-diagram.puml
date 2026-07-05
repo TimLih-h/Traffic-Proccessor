@@ -1,13 +1,16 @@
 @startuml
 !include <C4/C4_Deployment>
 
-title Deployment Diagram - Traffic Processor System
+title Deployment Diagram - Traffic Processor System (dev branch)
 
 Deployment_Node(docker_host, "Docker Host", "Linux/Windows/macOS") {
     Deployment_Node(compose, "Docker Compose", "Orchestrates containers") {
+        Container(gate, "gate", "Docker", "Reverse Proxy with IP Filtering")
         Container(tproc, "tproc", "Docker", "Traffic Processor - Packet capture and statistics")
-        Container(cnss, "cnss", "Docker", "Control and Status Server - FastAPI")
-        Container(db, "db", "PostgreSQL", "Persistent storage (planned)")
+        Container(mock_target, "mock_target", "Docker", "Protected application (internal)")
+        Container(error_server, "error_server", "Docker", "Blocked IP error page")
+        Container(cnss, "cnss", "Docker", "Control and Status Server - FastAPI + Static UI")
+        Container(db, "db", "PostgreSQL", "Persistent storage for traffic statistics")
     }
 }
 
@@ -19,9 +22,12 @@ Deployment_Node(user_node, "End User Device", "Browser") {
     System_Ext(end_user, "End User", "Accesses dashboard")
 }
 
-Rel(net_iface, tproc, "Captures packets from", "Raw socket (host network)")
-Rel(tproc, cnss, "Sends statistics via", "HTTP POST (port 8000)")
-Rel(cnss, db, "Planned persistence to", "SQL (port 5432)")
-Rel(end_user, cnss, "Accesses dashboard via", "HTTP (port 8000)")
+Rel(net_iface, gate, "Captures packets via", "Raw socket (host network)")
+Rel(gate, tproc, "Routes traffic to", "Internal network")
+Rel(tproc, cnss, "Sends statistics via", "HTTP POST (port 8080)")
+Rel(cnss, db, "Stores/retrieves data via", "SQL (port 5432)")
+Rel(end_user, gate, "Accesses dashboard via", "HTTP (port 8000)")
+Rel(gate, mock_target, "Proxies allowed traffic to", "Internal (port 5000)")
+Rel(gate, error_server, "Serves block page from", "Internal (port 5000)")
 
 @enduml
