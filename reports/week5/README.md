@@ -66,5 +66,5 @@
 ![Latest protected-default-branch CI run](/reports/week5/images/CI_run.png)
 ![SemVer release](/reports/week5/images/release.png)
 ![Example reviewed issue-linked PR or MR](/reports/week5/images/reviewed_issue-linked_PR.png)
-![Hosted docs site](/reports/week5/images/) - not done
+![Hosted docs site](/reports/week5/images/docs.png)
 
