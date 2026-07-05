@@ -46,11 +46,11 @@
 38. Contribution traceability table mapping each team member to issues, PRs or MRs, review activity, testing, quality, automation, architecture, or documentation work.
 39. Embedded screenshots from `reports/week5/images/` for:
 
-    * ![Sprint milestone](/reports/week5/images/)
-    * ![Board or project workflow view](/reports/week5/images/)
-    * ![Latest protected-default-branch CI run](/reports/week5/images/)
-    * ![SemVer release](/reports/week5/images/)
-    * ![Example reviewed issue-linked PR or MR](/reports/week5/images/)
-    * ![Hosted docs site](/reports/week5/images/)
+     ![Sprint milestone](/reports/week5/images/)
+     ![Board or project workflow view](/reports/week5/images/)
+     ![Latest protected-default-branch CI run](/reports/week5/images/)
+     ![SemVer release](/reports/week5/images/)
+     ![Example reviewed issue-linked PR or MR](/reports/week5/images/)
+     ![Hosted docs site](/reports/week5/images/)
 
 42. Include product access artifact screenshots where relevant or where public links may not be inspectable by graders.
