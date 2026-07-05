@@ -10,7 +10,7 @@
 2. [Sprint Backlog board](https://github.com/orgs/SWP-Team-46/projects/3)
 3. [Sprint 3 milestone](https://github.com/SWP-Team-46/Traffic-Proccessor/milestone/3)
 4. Deliver MVP v2, 2026-06-29 - 2026-07-05, Add traffic gate, add more data for analysing
-5. **18** story point for the current sprint, much more than previous velocity
+5. **18** story points for the current sprint, much more than previous velocity
 6. Add traffic gate, added per-IP data to be displayed, UI changes, backend changes
 7. Link to the relevant [product access artifact](http://147.45.234.218:8080)
 8. [Run instructions](/README.md)
