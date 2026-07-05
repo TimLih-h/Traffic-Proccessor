@@ -1,16 +1,16 @@
 @startuml
 !include <C4/C4_Deployment>
 
-title Deployment Diagram - Traffic Processor System (dev branch)
+title Deployment Diagram – Traffic Processor
 
 Deployment_Node(docker_host, "Docker Host", "Linux/Windows/macOS") {
-    Deployment_Node(compose, "Docker Compose", "Orchestrates containers") {
-        Container(gate, "gate", "Docker", "Reverse Proxy with IP Filtering")
-        Container(tproc, "tproc", "Docker", "Traffic Processor - Packet capture and statistics")
-        Container(mock_target, "mock_target", "Docker", "Protected application (internal)")
-        Container(error_server, "error_server", "Docker", "Blocked IP error page")
-        Container(cnss, "cnss", "Docker", "Control and Status Server - FastAPI + Static UI")
-        Container(db, "db", "PostgreSQL", "Persistent storage for traffic statistics")
+    Deployment_Node(compose, "Docker Compose", "Orchestrates 6 containers") {
+        Container(tproc, "tproc", "Docker", "Traffic Processor – packet capture")
+        Container(gate, "gate", "Docker", "Reverse proxy with IP filtering")
+        Container(mock_target, "mock_target", "Docker", "Protected application")
+        Container(error_server, "error_server", "Docker", "Error page for blocked IPs")
+        Container(cnss, "cnss", "Docker", "Control & Status Server – FastAPI")
+        Container(db, "postgres", "PostgreSQL 14.8", "Persistent storage")
     }
 }
 
@@ -19,15 +19,20 @@ Deployment_Node(network, "Network", "External") {
 }
 
 Deployment_Node(user_node, "End User Device", "Browser") {
-    System_Ext(end_user, "End User", "Accesses dashboard")
+    System_Ext(end_user, "End User", "Accesses dashboard & protected target")
 }
 
-Rel(net_iface, gate, "Captures packets via", "Raw socket (host network)")
-Rel(gate, tproc, "Routes traffic to", "Internal network")
-Rel(tproc, cnss, "Sends statistics via", "HTTP POST (port 8080)")
-Rel(cnss, db, "Stores/retrieves data via", "SQL (port 5432)")
-Rel(end_user, gate, "Accesses dashboard via", "HTTP (port 8000)")
-Rel(gate, mock_target, "Proxies allowed traffic to", "Internal (port 5000)")
-Rel(gate, error_server, "Serves block page from", "Internal (port 5000)")
+' Network connections
+Rel(net_iface, tproc, "Captures packets from", "Raw socket (NET_ADMIN)")
+Rel(tproc, cnss, "Sends stats via", "HTTP POST (port 8080)")
+Rel(cnss, db, "Persists via", "SQL (port 5432)")
+
+' User-facing connections
+Rel(end_user, gate, "Accesses protected target", "HTTP (port 8000)")
+Rel(end_user, cnss, "Accesses dashboard", "HTTP (port 8080)")
+
+' Internal connections
+Rel(gate, mock_target, "Proxies allowed requests", "HTTP (port 5000)")
+Rel(gate, error_server, "Forwards blocked requests", "HTTP (port 5000)")
 
 @enduml
