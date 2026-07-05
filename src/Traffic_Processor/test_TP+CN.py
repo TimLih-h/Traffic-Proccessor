@@ -21,12 +21,28 @@ def mock_interface_info():
         yield mock_ifaddrs
 
 
-def test_initialization_with_interface(mock_interface_info):
-    """Test that TrafficProcessor obtains local IP and MAC from netifaces."""
+@pytest.fixture
+def mock_hostname_resolution():
+    """Mock socket.gethostbyname to return fixed IPs for CNSS and TARGET."""
+    with patch("socket.gethostbyname") as mock_gethostbyname:
+        # Return fake IPs for the expected hostnames
+        def side_effect(hostname):
+            if hostname == "cnss":
+                return "10.0.0.2"
+            if hostname == "mock_target":
+                return "8.8.8.8"
+            raise socket.gaierror("Unknown host")
+        mock_gethostbyname.side_effect = side_effect
+        yield mock_gethostbyname
+
+
+def test_initialization_with_interface(mock_interface_info, mock_hostname_resolution):
+    """Test that TrafficProcessor obtains IPs correctly."""
     tp = TrafficProcessor(interface="eth0", output_url="http://test", delay=0.5)
 
-    assert tp.local_ip == "192.168.1.100"
-    assert tp.local_mac == "aa:bb:cc:dd:ee:ff"
+    assert tp.gate_ip == "192.168.1.100"
+    assert tp.target_ip == "8.8.8.8"
+    assert tp.cnss_ip == "10.0.0.2"
     assert tp.interface == "eth0"
     assert tp.output_url == "http://test"
     assert tp.delay == 0.5
@@ -34,23 +50,25 @@ def test_initialization_with_interface(mock_interface_info):
     assert tp.packet_cnt == 0
     assert tp.incoming_packets == 0
     assert tp.outgoing_packets == 0
+    # IP tracker should have ignore_ips containing gate_ip
+    assert tp.gate_ip in tp.ip_tracker.ignore_ips
 
 
-def test_packet_handler_statistics():
+def test_packet_handler_statistics(mock_hostname_resolution):
     """Test packet_handler increments counters and directions correctly."""
     tp = TrafficProcessor(interface="eth0", output_url="http://test")
-    tp.local_ip = "192.168.1.100"
-    tp.local_mac = "aa:bb:cc:dd:ee:ff"
+    # Override IPs to known test values; set cnss_ip to a dummy so packets are not filtered
+    tp.gate_ip = "192.168.1.100"
+    tp.target_ip = "8.8.8.8"
+    tp.cnss_ip = "10.0.0.2"
 
-    # Create a mock TCP packet from external to local
-    from scapy.all import IP, TCP, Ether
-
-    # Incoming TCP packet
-    pkt_in = Ether(src="ff:ff:ff:ff:ff:ff", dst="aa:bb:cc:dd:ee:ff") / IP(src="10.0.0.1", dst="192.168.1.100") / TCP()
-    # Outgoing UDP packet
-    pkt_out = Ether(src="aa:bb:cc:dd:ee:ff", dst="ff:ff:ff:ff:ff:ff") / IP(src="192.168.1.100", dst="8.8.8.8") / UDP()
-    # ICMP packet (direction unknown because local IP not set? but we have local IP so it works)
-    pkt_icmp = IP(src="1.1.1.1", dst="192.168.1.100") / ICMP()
+    # Create packets matching the direction rules
+    # Incoming: dst == gate_ip
+    pkt_in = Ether() / IP(src="10.0.0.1", dst="192.168.1.100") / TCP(sport=12345, dport=80)
+    # Outgoing: src == target_ip
+    pkt_out = Ether() / IP(src="8.8.8.8", dst="192.168.1.1") / UDP(sport=53, dport=12345)
+    # ICMP: incoming (dst == gate_ip)
+    pkt_icmp = Ether() / IP(src="1.1.1.1", dst="192.168.1.100") / ICMP()
 
     tp.packet_handler(pkt_in)
     tp.packet_handler(pkt_out)
@@ -63,53 +81,72 @@ def test_packet_handler_statistics():
     assert tp.icmp_cnt == 1
     assert tp.other_cnt == 0
 
-    assert tp.incoming_packets == 2  # TCP and ICMP have dst==local_ip
-    assert tp.outgoing_packets == 1
+    assert tp.incoming_packets == 2  # TCP and ICMP have dst==gate_ip
+    assert tp.outgoing_packets == 1  # UDP has src==target_ip
     assert tp.incoming_bytes == len(pkt_in) + len(pkt_icmp)
     assert tp.outgoing_bytes == len(pkt_out)
+
+    # Quick check that IP tracker was updated (it should have entries)
+    assert len(tp.ip_tracker.data) > 0
 
 
 def test_post_json_success_and_failure():
     """Test post_json handles successful response and HTTP errors."""
     tp = TrafficProcessor(output_url="http://localhost:8000")
-    # Mock the urlopen context manager
-    with patch("urllib.request.urlopen") as mock_urlopen:
-        # --- Success case ---
-        mock_response = Mock()
-        mock_response.getcode.return_value = 200
-        mock_response.read.return_value = b'{"status":"ok"}'
-        mock_urlopen.return_value.__enter__.return_value = mock_response
+    # Mock get_stats to return a fixed dictionary so we don't depend on IP tracker state
+    mock_stats = {
+        "timestamp": "2023-01-01T00:00:00",
+        "total_packets": 100,
+        "total_bytes": 5000,
+        "incoming_packets": 60,
+        "outgoing_packets": 40,
+        "incoming_bytes": 3000,
+        "outgoing_bytes": 2000,
+        "packets_per_second": 10.0,
+        "bytes_per_second": 500.0,
+        "tcp_packets": 70,
+        "udp_packets": 20,
+        "icmp_packets": 10,
+        "other_packets": 0,
+        "top_ips": [],
+        "status": "online"
+    }
+    with patch.object(tp, "get_stats", return_value=mock_stats):
+        with patch("urllib.request.urlopen") as mock_urlopen:
+            # --- Success case ---
+            mock_response = Mock()
+            mock_response.getcode.return_value = 200
+            mock_response.read.return_value = b'{"status":"ok"}'
+            mock_urlopen.return_value.__enter__.return_value = mock_response
 
-        status, body = tp.post_json()
-        assert status == 200
-        assert body == '{"status":"ok"}'
+            status, body = tp.post_json()
+            assert status == 200
+            assert body == '{"status":"ok"}'
 
-        # Verify request was called with correct data and headers
-        args, kwargs = mock_urlopen.call_args
-        request = args[0]  # The Request object
-        assert request.get_method() == "POST"
-        assert request.headers.get("Content-type") == "application/json"
-        # The data should be a JSON encoded stats dict
-        data = json.loads(request.data.decode())
-        assert "timestamp" in data
-        assert data["status"] == "online"
+            # Verify request was called with correct data and headers
+            args, kwargs = mock_urlopen.call_args
+            request = args[0]  # The Request object
+            assert request.get_method() == "POST"
+            assert request.headers.get("Content-type") == "application/json"
+            # The data should be a JSON encoded stats dict
+            data = json.loads(request.data.decode())
+            assert "timestamp" in data
+            assert data["status"] == "online"
 
-        # --- HTTP error case ---
-        # Reset mock and raise HTTPError
-        mock_urlopen.reset_mock()
-        # HTTPError takes (url, code, msg, hdrs, fp)
-        error_response = Mock()
-        error_response.read.return_value = b'{"error":"bad request"}'
-        mock_urlopen.side_effect = error.HTTPError(
-            url="http://localhost:8000", code=400, msg="Bad Request", hdrs={}, fp=error_response
-        )
+            # --- HTTP error case ---
+            mock_urlopen.reset_mock()
+            error_response = Mock()
+            error_response.read.return_value = b'{"error":"bad request"}'
+            mock_urlopen.side_effect = error.HTTPError(
+                url="http://localhost:8000", code=400, msg="Bad Request", hdrs={}, fp=error_response
+            )
 
-        status, body = tp.post_json()
-        assert status == 400
-        assert body == '{"error":"bad request"}'
+            status, body = tp.post_json()
+            assert status == 400
+            assert body == '{"error":"bad request"}'
 
-        # --- Non-HTTP exception ---
-        mock_urlopen.reset_mock()
-        mock_urlopen.side_effect = ConnectionError("Network unreachable")
-        with pytest.raises(ConnectionError):
-            tp.post_json()
+            # --- Non-HTTP exception ---
+            mock_urlopen.reset_mock()
+            mock_urlopen.side_effect = ConnectionError("Network unreachable")
+            with pytest.raises(ConnectionError):
+                tp.post_json()
