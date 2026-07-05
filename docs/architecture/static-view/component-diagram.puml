@@ -1,28 +1,53 @@
 @startuml
-!include <C4/C4_Component>
-!include <C4/C4_Context>
+!theme plain
+title Traffic Processor System – Component Diagram (Static View)
 
-title Component Diagram – Traffic Processor System
-
-Person(end_user, "End User", "Accesses the web dashboard and the protected target")
-
-System_Boundary(tp_system, "Traffic Processor System") {
-    Component(tproc, "TProc", "Python / Scapy", "Captures packets, tracks per-IP stats, sends to CNSS")
-    Component(gate, "Gate", "Python / HTTP Proxy", "Reverse proxy with IP filtering; blocks suspicious IPs")
-    Component(error_server, "Error Server", "Flask", "Serves access-denied page for blocked IPs")
-    Component(mock_target, "Mock Target", "Flask", "Protected application behind the gate")
-    Component(cnss, "CNSS", "FastAPI", "Receives stats, serves dashboard, supports reset")
-    Component(postgres, "PostgreSQL", "PostgreSQL 14.8", "Persistent storage for CNSS")
+package "Traffic Processor System" {
+  
+  package "Traffic Capture" {
+    [TProc] as tproc
+    () "Raw Socket" as net_iface
+    () "HTTP POST /load" as load_api
+  }
+  
+  package "Access Control" {
+    [Gate] as gate
+    [Mock Target] as mock_target
+    [Error Server] as error_server
+    () "HTTP Proxy" as proxy_api
+  }
+  
+  package "Control & Status" {
+    [CNSS] as cnss
+    () "GET /packets" as get_api
+    () "POST /reset" as reset_api
+  }
+  
+  package "Data Layer" {
+    [PostgreSQL] as postgres
+    () "SQL / Alembic" as sql_api
+  }
 }
 
-System_Ext(network, "Network Interface", "Live packet source")
+' External interfaces
+() "Live Network Traffic" as network
+() "Dashboard Access" as dashboard
 
-Rel(network, tproc, "Captures packets from", "Raw socket (NET_ADMIN)")
-Rel(tproc, cnss, "Sends statistics via", "HTTP POST /load")
-Rel(cnss, postgres, "Persists data via", "SQL / Alembic")
-Rel(end_user, gate, "Accesses protected target via", "HTTP (port 8000)")
-Rel(gate, mock_target, "Proxies allowed requests to", "HTTP")
-Rel(gate, error_server, "Forwards blocked requests to", "HTTP (error page)")
-Rel(end_user, cnss, "Accesses dashboard via", "HTTP (port 8080)")
+network --> net_iface
+net_iface --> tproc : captures
+tproc --> load_api
+load_api --> cnss : sends stats
 
+' Client access
+dashboard --> cnss : HTTP
+network --> gate : HTTP
+
+' Gate routing
+gate --> proxy_api
+proxy_api --> mock_target : if allowed
+proxy_api --> error_server : if blocked
+
+' Persistence
+cnss --> sql_api
+sql_api --> postgres : persists
 @enduml
