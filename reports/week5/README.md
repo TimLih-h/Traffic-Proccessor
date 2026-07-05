@@ -42,7 +42,7 @@
 27. [Changelog](/CHANGELOG.md)
 28. Public sanitized demo video shorter than two minutes - not done
 29. All four UAT tests (UAT-001, UAT-002, UAT-003, and UAT-004) executed during Sprint 2 passed successfully, covering live traffic statistics, Docker Compose operation, directional packet classification, and the additional validation introduced in the assignment-5 branch, the customer reported no critical issues
-30. Link to the hosted documentation site - not done
+30. [Documentation site](https://github.com/SWP-Team-46/Traffic-Proccessor/tree/main/docs)
 31. [Sprint Review transcript](/reports/week5/sprint-review-transcript.md)
 32. [Sprint review summary](reports/week5/sprint-review-summary.md)
 33. [Reflection](reports/week5/reflection.md)
