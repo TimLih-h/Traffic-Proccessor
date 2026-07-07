@@ -7,9 +7,9 @@
 7. Summary of the Week 6 trial-release changes.
 8. Link to the Week 6 product access artifact.
 9. Link to current access or run instructions.
-10. [README](README.md)
-11. [CONTRIBUTING](CONTRIBUTING.md)
-12. [AGENTS](AGENTS.md)
+10. [README](/README.md)
+11. [CONTRIBUTING](/CONTRIBUTING.md)
+12. [AGENTS](/AGENTS.md)
 13. [Handover](/docs/customer-handover.md)
 14. Link to the hosted documentation site.
 15. Summary of the customer-facing documentation review, including what the customer found clear, unclear, or missing.
