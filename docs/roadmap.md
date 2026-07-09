@@ -20,6 +20,12 @@
 ### Sprint 3
 
 - 29/06/2026 - 5/07/2026
+- [Milestone](https://github.com/SWP-Team-46/Traffic-Proccessor/milestone/3)
+- Add Traffic Gate to block traffic via blacklist, imporve data collection by collecting statistics on per-IP basis
+- [Gate reverse proxy for IP-based access control](https://github.com/SWP-Team-46/Traffic-Proccessor/issues/96)
+- [Block Traffic Based on a Blacklist](https://github.com/SWP-Team-46/Traffic-Proccessor/issues/16)
+- [Per‑Connection Statistics Collection](https://github.com/SWP-Team-46/Traffic-Proccessor/issues/9)
+- [Add per-IP statistics display and filter management traffic](https://github.com/SWP-Team-46/Traffic-Proccessor/issues/99)
 
 ### Sprint 4
 
