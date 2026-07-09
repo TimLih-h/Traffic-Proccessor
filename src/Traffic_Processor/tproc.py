@@ -171,22 +171,7 @@ class TrafficProcessor:
                 print("[TP] WARNING: CNSS IP not resolved – monitoring traffic may slip through.")
 
 
-        # Get the gate's own IP from the interface
-        self.gate_ip = None
         self.target_ip = None
-        if interface != "any":
-            try:
-                addrs = netifaces.ifaddresses(interface)
-                ipv4 = addrs.get(netifaces.AF_INET, [])
-                if ipv4:
-                    self.gate_ip = ipv4[0]['addr']
-                print(f"[TP] Gate IP: {self.gate_ip}")
-
-            except Exception as e:
-                print(f"[TP] Could not get interface info: {e}")
-        else:
-            print("[TP] Using 'any' interface - direction classification may be unreliable.")
-
         target_hostname = os.environ.get("TARGET_HOSTNAME", "mock_target")
         try:
             self.target_ip = socket.gethostbyname(target_hostname)
@@ -199,7 +184,7 @@ class TrafficProcessor:
                 print("[TP] WARNING: target IP not resolved – outgoing counts will be incorrect.")
 
         # Per-IP tracker
-        self.ip_tracker = IPTracker(window_seconds=60, max_ips=1000, ignore_ips={self.gate_ip} if self.gate_ip else None)
+        self.ip_tracker = IPTracker(window_seconds=60, max_ips=1000)
 
         self.running = False
         self.sender_thread = None
@@ -213,6 +198,7 @@ class TrafficProcessor:
                 dst_ip = packet[IP].dst
                 # If the DESTINATION is the gate:
                 # We only ignore it if it's on a management port (DNS, CNSS API).
+     
                 is_management = False
                 if self.cnss_ip and (src_ip == self.cnss_ip or dst_ip == self.cnss_ip):
                     return
@@ -225,6 +211,7 @@ class TrafficProcessor:
                         is_management = True
                 if is_management:
                    return
+
             # --- UPDATE GLOBAL COUNTERS ---
             self.packet_cnt += 1
             self.bytes_cnt += len(packet)
@@ -256,7 +243,7 @@ class TrafficProcessor:
                 if ip.src == self.target_ip:
                     self.outgoing_packets += 1
                     self.outgoing_bytes += len(packet)
-                elif ip.dst == self.gate_ip:
+                elif ip.dst == self.target_ip:
                     self.incoming_packets += 1
                     self.incoming_bytes += len(packet)
                     
