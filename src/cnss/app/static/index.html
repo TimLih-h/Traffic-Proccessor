@@ -73,12 +73,23 @@
                 </div>
 
                 <aside class="dashboard-controls" aria-label="Dashboard controls">
-                  <div class="metric-toggle" role="group" aria-label="Metric type">
-                    <button class="toggle-button active" type="button" data-metric="packets">Packets</button>
-                    <button class="toggle-button" type="button" data-metric="bytes">Bytes</button>
-                  </div>
-                  <button class="reset-button" id="reset-button" type="button">Reset</button>
-                </aside>
+  		<div class="metric-toggle" role="group" aria-label="Metric type">
+    		<button class="toggle-button active" type="button" data-metric="packets">Packets</button>
+    		<button class="toggle-button" type="button" data-metric="bytes">Bytes</button>
+  		</div>
+
+  <div class="theme-control">
+    <label for="theme-select">Theme</label>
+    <select id="theme-select" class="theme-select" aria-label="Theme selector">
+      <option value="classic">Orange Blue</option>
+      <option value="dark">Dark</option>
+      <option value="light">Light</option>
+      <option value="green">Green</option>
+    </select>
+  </div>
+
+  <button class="reset-button" id="reset-button" type="button">Reset</button>
+</aside>
               </div>
 
               <section class="chart-panel">
