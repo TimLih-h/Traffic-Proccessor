@@ -90,10 +90,10 @@ function getStatsEndpoint() {
   const runsOutsideBackend =
     window.location.protocol === "file:" ||
     (["localhost", "127.0.0.1"].includes(window.location.hostname) &&
-      window.location.port !== "8080");
+      window.location.port !== "38080");
 
   return runsOutsideBackend
-    ? "http://localhost:8080/packets"
+    ? "http://localhost:38080/packets"
     : `${window.location.origin}/packets`;
 }
 
