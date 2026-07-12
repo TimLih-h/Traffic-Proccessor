@@ -19,21 +19,21 @@ Traffic Processor is a network visibility and control tool that captures live pa
 The static view describes the system's component structure, interfaces, and relationships.
 
 - **Diagram:** [component-diagram.puml](static-view/component-diagram.puml)
-- **Rendered form:** ![component-diagram.svg](static-view/component-diagram.svg)
+- ![component-diagram.svg](static-view/component-diagram.svg)
 
 ### Dynamic View
 
 The dynamic view describes key runtime interactions and workflows, including packet capture, statistics transmission, and dashboard refresh.
 
 - **Diagram:** [sequence-diagram.puml](dynamic-view/sequence-diagram.puml)
-- **Rendered form:** ![sequence-diagram.svg](dynamic-view/sequence-diagram.svg)
+- ![sequence-diagram.svg](dynamic-view/sequence-diagram.svg)
 
 ### Deployment View
 
 The deployment view describes the runtime deployment structure using Docker Compose with two containers (CNSS + PostgreSQL). TProc runs separately and can be deployed independently.
 
 - **Diagram:** [deployment-diagram.puml](deployment-view/deployment-diagram.puml)
-- **Rendered form:** ![deployment-diagram.svg](deployment-view/deployment-diagram.svg)
+- ![deployment-diagram.svg](deployment-view/deployment-diagram.svg)
 
 ## Key Architectural Decisions (ADRs)
 
