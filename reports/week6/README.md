@@ -2,7 +2,7 @@
 
 2. **[Product Backlog view](https://github.com/SWP-Team-46/Traffic-Proccessor/issues?q=is%3Aissue)**
 
-3. **[Sprint 4 view](https://github.com/SWP-Team-46/Traffic-Proccessor/projects/4)**
+3. **[Sprint 4 view](https://github.com/orgs/SWP-Team-46/projects/4)**
 
 4. **[Sprint 4 milestone](https://github.com/SWP-Team-46/Traffic-Proccessor/milestones/4)**
 
@@ -45,10 +45,10 @@
 
 20. **Link to the maintained quality, testing, architecture, development-process, and other customer-relevant documentation updated during Sprint 4**  
     See the `docs/` folder:
-    - [Architecture Overview](docs/architecture)
-    - [Testing & Quality](docs/testing.md)
-    - [Roadmap](docs/roadmap.md)
-    - [User Acceptance Tests](docs/user-acceptance-tests.md)
+    - [Architecture Overview](/docs/architecture)
+    - [Testing & Quality](/docs/testing.md)
+    - [Roadmap](/docs/roadmap.md)
+    - [User Acceptance Tests](/docs/user-acceptance-tests.md)
 
 21. All documented UATs have passed
 
@@ -56,7 +56,7 @@
 
 23. **[CHANGELOG](/CHANGELOG.md)**
 
-24. [**Sprint Review transcript**](sprint-review-transcript.md)
+24. **[Sprint Review transcript](sprint-review-transcript.md)**
 
 25. **[Sprint Review Summary](sprint-review-summary.md)**
 
