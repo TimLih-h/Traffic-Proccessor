@@ -4,7 +4,7 @@
 [![Docker](https://img.shields.io/badge/docker-ready-2496ED?logo=docker)](https://www.docker.com/)
 [![License](https://img.shields.io/github/license/SWP-Team-46/Traffic-Proccessor)](LICENSE)
 
-**Traffic Processor** is a network visibility and control tool that captures live packet counters, per‑connection statistics, and traffic history, while supporting blocking, tunneling, and failover behaviours.[reference:0][reference:1]
+**Traffic Processor** is a network visibility and control tool that captures live packet counters, per‑connection statistics, and traffic history, while supporting blocking, tunneling, and failover behaviours.
 
 ---
 
