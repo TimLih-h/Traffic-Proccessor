@@ -68,7 +68,7 @@
 
 29. **Summary of the current product status and expected Week 7 follow-up work.**  
     - **Current status:** The system is fully containerised and includes TProc, CNSS, and PostgreSQL
-    - **Week 7 follow‑up:** Bug fixes, finishing touches, try to add VM-to-VM compatability
+    - **Week 7 follow‑up:** Bug fixes, finishing touches, try to add VM-to-VM compatability, store statistics in database
 
 30. **Contribution traceability table mapping each team member to issues, PRs or MRs, review activity, testing, documentation, transition, or deployment work.**  
 
