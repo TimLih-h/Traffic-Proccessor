@@ -35,15 +35,15 @@ $resultId = docker ps --filter "name=???" --format "{{.ID}}"
  >>   --cap-add=NET_ADMIN `
  >>   --cap-add=NET_RAW `
  >>   -e CNSS_URL="http://host.docker.internal:38080/load" `
- >>   -e INTERFACE="???" `
- >>   -e TARGET_HOSTNAME="???" `
+ >>   -e INTERFACE="eth0" `
+ >>   -e TARGET_HOSTNAME="TP" `
  >>   traffic-processor:latest
 ```
 
 TProc can be configured via environment variables:
 - `INTERFACE` – network interface to capture from (default: `eth0`)
-- `CNSS_URL` – CNSS endpoint URL (default: `http://cnss:38080/load`)
-- `DELAY` – interval between data pushes in seconds (default: `1`)
+- `CNSS_URL` – CNSS endpoint URL (default: `http://host.docker.internal:38080/load`, works when cnss is on the same device)
+- `TARGET_HOSTNAME` – container name to monitor (default: TP)
 
 Once running, open the **web dashboard** at  
 **[http://localhost:38080/static/index.html](http://localhost:38080/static/index.html)**
