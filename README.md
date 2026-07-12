@@ -15,17 +15,43 @@ The easiest way to try the current version is to run the fully containerised sta
 Install [docker desktop](https://www.docker.com/products/docker-desktop/)
 
 ```bash
-git clone https://github.com/SWP-Team-46/Traffic-Proccessor.git
+git clone https://github.com/SWP-Team-46/Traffic-Proccessor
 cd Traffic-Proccessor/src
+```
+
+From the `src` directory:
+
+```bash
 docker compose up --build
 ```
+
+This starts CNSS and PostgreSQL. The dashboard is available at http://localhost:38080.
+
+To run Traffic Proccessor:
+```bash
+make build
+$resultId = docker ps --filter "name=???" --format "{{.ID}}" 
+ >> docker run --rm `
+ >>   --network container:$resultId `
+ >>   --cap-add=NET_ADMIN `
+ >>   --cap-add=NET_RAW `
+ >>   -e CNSS_URL="http://host.docker.internal:38080/load" `
+ >>   -e INTERFACE="???" `
+ >>   -e TARGET_HOSTNAME="???" `
+ >>   traffic-processor:latest
+```
+
+TProc can be configured via environment variables:
+- `INTERFACE` – network interface to capture from (default: `eth0`)
+- `CNSS_URL` – CNSS endpoint URL (default: `http://cnss:38080/load`)
+- `DELAY` – interval between data pushes in seconds (default: `1`)
 
 Once running, open the **web dashboard** at  
 **[http://localhost:8080/static/index.html](http://localhost:8080/static/index.html)**
 
 For programmatic access, use the CNSS API endpoints (`POST /load`, `GET /packets`, `POST /reset`).
 
-> **Current release:** [v2.0.0](CHANGELOG.md) - adds per‑IP statistics and blacklist‑based traffic blocking.
+
 
 ---
 
@@ -52,24 +78,6 @@ For the current product state, handover scope, and customer‑facing instruction
 
 - **[CONTRIBUTING.md](CONTRIBUTING.md)** - Practical steps for setting up, branching, opening PRs, and meeting review requirements.
 - **[AGENTS.md](AGENTS.md)** - Actionable setup, build, test, and safety instructions for coding agents.
-
----
-
-## Quick Setup & Run
-
-All development is containerised with Docker Compose - no system‑wide Python dependencies are required.
-
-```bash
-# Clone and start all services
-git clone https://github.com/SWP-Team-46/Traffic-Proccessor.git
-cd Traffic-Proccessor/src
-docker compose up --build
-
-# Verify the Traffic Processor is capturing data
-docker exec tproc cat /data/data.txt | head -3
-```
-
-For detailed setup, build, and test commands, refer to [AGENTS.md](AGENTS.md#1-setup-build-test-and-verification-commands).
 
 ---
 
