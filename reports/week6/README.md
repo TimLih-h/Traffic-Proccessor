@@ -1,5 +1,4 @@
-1. **Project name and short description.**  
-   **Traffic Processor** – a network visibility and control tool that captures live packet counters, per‑connection statistics, and traffic history, while supporting blocking, tunneling, and failover behaviours
+1. **Traffic Processor** – a network visibility and control tool that captures live packet counters, per‑connection statistics, and traffic history, while supporting blocking, tunneling, and failover behaviours
 
 2. **[Product Backlog view](https://github.com/SWP-Team-46/Traffic-Proccessor/issues?q=is%3Aissue)**
 
@@ -20,7 +19,7 @@
    - Website UI overhaul
 8. [**Link to the Week 6 product access artifact**](http://147.45.234.218:38080/)
 
-9. **Link to current access or run instructions.**  
+9. **Current access or run instructions.**  
    See the main [README](https://github.com/SWP-Team-46/Traffic-Proccessor/blob/Asignment-6/README.md) for detailed setup and usage instructions
 
 10. **[README](/README.md)**
