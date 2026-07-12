@@ -1,0 +1,56 @@
+# ADR-004: Gate as Reverse Proxy with IP Filtering
+
+## Status
+**Deprecated**
+
+> This decision was implemented in the `main` branch but has been **removed** in the `dev` branch. The current system consists only of TProc, CNSS, and PostgreSQL. Gate, Mock Target, and Error Server are no longer part of the architecture.
+
+---
+
+## Context
+
+The system originally required a controlled access layer to protect a mock target application. External clients would send traffic that needed to be:
+
+- Inspected for source IP (allowlisting/blocking)
+- Proxied to a protected internal service (Mock Target) if allowed
+- Rejected with a clear error page (Error Server) if blocked
+
+The Traffic Processor (TProc) was only responsible for capturing and reporting traffic statistics, not for enforcing access control. Therefore, a separate component was needed to sit between the external client and the internal target.
+
+---
+
+## Decision
+
+We decided to implement **Gate** as a standalone reverse proxy service with the following responsibilities:
+
+- **IP filtering** – Maintain an allowlist/blocklist of source IP addresses.
+- **Traffic forwarding** – Proxy allowed requests to the Mock Target service.
+- **Error handling** – Return a 403 Forbidden page (served by the Error Server) for blocked requests.
+- **Stateless design** – No persistence; all filtering rules are loaded at startup or via API.
+
+Gate was built using **FastAPI** with `httpx` for proxying, and deployed as a separate container in the Docker Compose stack.
+
+---
+
+## Consequences
+
+### Positive
+- Clear separation of concerns: Gate handles security, TProc handles monitoring.
+- IP filtering logic is isolated and can be updated independently.
+- Can be extended to support rate limiting or authentication in the future.
+
+### Negative
+- Added operational complexity: one extra service to deploy, configure, and monitor.
+- Increased latency due to the extra proxy hop.
+- Filtering rules must be managed externally (no built-in persistence).
+
+### In the `dev` Branch
+- Gate has been **removed** along with Mock Target and Error Server.
+- The system now focuses solely on traffic capture (TProc) and statistics visualization (CNSS).
+- All access control logic is out of scope for the current version.
+
+---
+
+## Related ADRs
+- ADR-001: Asynchronous HTTP Communication
+- ADR-005: Docker Compose for Multi-Service Orchestration (original 6-container setup)
