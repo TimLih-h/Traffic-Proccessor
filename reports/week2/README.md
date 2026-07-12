@@ -57,9 +57,8 @@ For a non-graphical interface:
 - **Minimal PR/MR Template:**  
   [Link to `.gitlab/merge_request_templates/default.md` or `.github/pull_request_template.md`]
 - **Reviewed PRs/MRs created during Week 2:**  
-  - [PR #1 – Add basic packet counting](replace-with-actual-url)  
-  - [PR #2 – Web dashboard skeleton](replace-with-actual-url)  
-  *(Add actual links as needed)*
+  - [PR #1 – Add basic packet counting]()  
+  - [PR #2 – Web dashboard skeleton]()  
 
 ---
 
@@ -138,10 +137,7 @@ MVP v0 establishes the foundational infrastructure for:
 
 - **Published Customer Transcript (if publication permitted):**  
   [Customer Meeting Transcript](./customer-meeting-transcript.md)
-
-- **Customer Meeting Notes (if recording or private sharing refused):**  
-  [Customer Meeting Notes](./customer-meeting-notes.md)
-
+  
 - **Customer Meeting Summary:**  
   [Customer Meeting Summary](./customer-meeting-summary.md)
 
