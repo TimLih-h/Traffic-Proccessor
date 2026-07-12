@@ -3,6 +3,7 @@ exclude = [
     # Internal IP
     "http://147.45.234.218:38080",
     "http://localhost:38080",
+    "http://localhost",
     
     # Private GitLab
     "https://gitlab.pg.innopolis.university",
