@@ -1,12 +1,12 @@
 # Exclude problematic URLs and patterns
 exclude = [
     # Internal IP
-    "http://147.45.234.218:38080",
-    "http://localhost:38080",
-    "http://localhost",
+    "http://147.45.234.218:38080/",
+    "http://localhost:38080/",
+    "http://localhost/",
     
     # Private GitLab
-    "https://gitlab.pg.innopolis.university",
+    "https://gitlab.pg.innopolis.university/",
     
     # GitHub settings pages (require login)
     "https://github.com/mrZom49/Traffic-Proccessor-SWP-46/settings/rules/",
