@@ -17,7 +17,7 @@
    - CNSS and TP now can be on diffirent devices
    - Separated CNSS and TP startup
    - Website UI overhaul
-8. [**Link to the Week 6 product access artifact**](http://147.45.234.218:38080/)
+8. [**Link to the Week 6 product access artifact**](http://localhost:38080/static/index.html)
 
 9. **Current access or run instructions.**  
    See the main [README](https://github.com/SWP-Team-46/Traffic-Proccessor/blob/Asignment-6/README.md) for detailed setup and usage instructions
