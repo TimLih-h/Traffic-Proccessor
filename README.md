@@ -73,15 +73,15 @@ For detailed setup, build, and test commands, refer to [AGENTS.md](AGENTS.md#1-s
 
 ## Repository Structure
 
-.
-├── src/               # Application source code (TProc, CNSS, Gate, Error Server)
-├── docs/              # Maintained documentation (architecture, testing, handover, etc.)
-├── reports/           # Project reports and status updates
-├── .github/           # CI workflows and issue/PR templates
-├── AGENTS.md          # Agent‑focused setup and workflow guide
-├── CONTRIBUTING.md    # Contribution process and review expectations
-├── CHANGELOG.md       # Version history
-└── LICENSE            # Project license
+.\
+├── src/               # Application source code (TProc, CNSS, Gate, Error Server)\
+├── docs/              # Maintained documentation (architecture, testing, handover, etc.)\
+├── reports/           # Project reports and status updates\
+├── .github/           # CI workflows and issue/PR templates\
+├── AGENTS.md          # Agent‑focused setup and workflow guide\
+├── CONTRIBUTING.md    # Contribution process and review expectations\
+├── CHANGELOG.md       # Version history\
+└── LICENSE            # Project license\
 
 ---
 
