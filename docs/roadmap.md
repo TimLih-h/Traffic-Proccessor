@@ -30,6 +30,12 @@
 ### Sprint 4
 
 - 6/07/2026 - 12/07/2026
+- [Milestone](https://github.com/SWP-Team-46/Traffic-Proccessor/milestone/4)
+
+### Sprint 5
+
+- 13/07/2026 - 19/07/2026
+- [Milestone](https://github.com/SWP-Team-46/Traffic-Proccessor/milestone/5)
 
 <!--
 ### Structure the roadmap as a list of Sprints. For each Sprint, include:

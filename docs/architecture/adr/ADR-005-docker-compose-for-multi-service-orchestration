@@ -1,0 +1,70 @@
+# ADR-005: Docker Compose for Multi-Service Orchestration
+
+## Status
+**Partially Implemented**
+
+> The current `docker-compose.yml` defines only **two** services (`cnss` and `postgres`). TProc is **not** containerized in the Compose stack – it runs separately as a standalone Python process.
+
+---
+
+## Context
+
+The system consists of multiple cooperating services that need to be started, stopped, and networked together consistently across development and production environments. Manual startup with shell scripts or `docker run` commands is error-prone and hard to document.
+
+We needed a lightweight orchestration tool that:
+- Is widely adopted and well-documented.
+- Works on local developer machines and CI/CD pipelines.
+- Supports service discovery via internal DNS (service names as hostnames).
+- Allows easy volume mounting for persistent data (e.g., PostgreSQL).
+
+---
+
+## Decision
+
+We decided to use **Docker Compose** to orchestrate all containerized services.
+
+### Original Scope (as designed in `main`)
+- **6 services**: Gate, Mock Target, Error Server, CNSS, PostgreSQL, and optionally TProc.
+- All services defined in a single `docker-compose.yml` with explicit dependencies and networks.
+
+### Current Scope (as implemented in ``)
+- **2 services**: CNSS (FastAPI) and PostgreSQL (14.8).
+- TProc runs **outside** the Compose stack – it is executed manually with `python tproc.py` and configured via environment variables to point to the CNSS container.
+- The Compose network (`tp-network`) still exists to allow CNSS and PostgreSQL to communicate.
+
+---
+
+## Consequences
+
+### Positive
+- **Reproducibility** – Anyone can spin up the entire stack with a single `docker compose up --build` command.
+- **Networking** – Services can reference each other by service name (e.g., `cnss:38080`).
+- **Isolation** – Each service runs in its own container with its own dependencies.
+- **Data persistence** – PostgreSQL data survives container restarts via named volumes.
+- **CI/CD friendly** – Can be integrated into GitHub Actions or other pipelines.
+
+### Negative
+- **Overhead** – Docker must be installed on all target machines.
+- **Learning curve** – Team members need to understand Docker Compose syntax and networking.
+- **TProc separation** – TProc is not part of the Compose stack, so developers must remember to start it manually. This introduces a potential mismatch between documentation and actual runtime.
+
+### Alternative Considered
+- **Kubernetes** – Rejected due to excessive complexity for this project scope.
+- **Pure shell scripts** – Rejected due to lack of service orchestration features (health checks, dependency ordering, automatic restarts).
+
+---
+
+## Related ADRs
+- ADR-002: PostgreSQL for Persistent Storage
+- ADR-004: Gate as Reverse Proxy with IP Filtering (deprecated)
+
+---
+
+## Usage
+
+```bash
+cd src
+docker compose up --build   # starts CNSS + PostgreSQL
+# In a separate terminal:
+cd src/Traffic_Processor
+python tproc.py             # start TProc manually

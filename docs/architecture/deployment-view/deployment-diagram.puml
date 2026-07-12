@@ -39,21 +39,15 @@ node "Docker Host" <<server>> as DockerHost {
 
   node "Docker Compose" <<execution environment>> as Compose {
 
-    ' Shared network namespace (TProc shares Gate's network)
-    node "Gate Network Namespace" <<execution environment>> as GateNet {
-      component [Gate\n(Reverse Proxy)] as gate
-      component [TProc\n(Packet Sniffer)] as tproc
-    }
-
-    component [Mock Target\n(Protected App)] as mock_target
-    component [Error Server\n(403 Page)] as error_server
-
     node "Control & Status" <<execution environment>> {
       component [CNSS\n(FastAPI)] as cnss
     }
 
     database [PostgreSQL 14.8] as postgres
   }
+
+  ' TProc runs separately outside Compose (standalone process)
+  component [TProc\n(Packet Sniffer)] as tproc
 }
 
 ' --- Relationships (External → Internal) ---
@@ -61,12 +55,7 @@ network --> tproc : Raw Socket (NET_ADMIN)
 tproc --> cnss : HTTP POST /load (port 8080)
 
 ' --- Client Access ---
-browser --> gate : HTTP (port 8000)\n(protected target)
 browser --> cnss : HTTP (port 8080)\n(dashboard)
-
-' --- Internal Routing (Gate) ---
-gate --> mock_target : HTTP (internal)\n(if IP allowed)
-gate --> error_server : HTTP (internal)\n(if IP blocked)
 
 ' --- Persistence ---
 cnss --> postgres : SQL (port 5432)

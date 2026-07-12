@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Traffic Processor</title>
-    <link rel="stylesheet" href="./styles.css?v=12" />
+    <link rel="stylesheet" href="./styles.css?v=17" />
   </head>
   <body>
     <main class="app-shell">
@@ -20,6 +20,29 @@
               <button class="view-tab active" type="button" data-view="dashboard">Overview</button>
               <button class="view-tab" type="button" data-view="table">Table</button>
             </nav>
+
+            <div class="theme-control">
+              <span class="theme-label" id="theme-label">Theme</span>
+              <div class="theme-picker">
+                <button
+                  class="theme-trigger"
+                  id="theme-trigger"
+                  type="button"
+                  aria-labelledby="theme-label theme-trigger"
+                  aria-haspopup="listbox"
+                  aria-expanded="false"
+                >
+                  <span id="theme-value">Orange Blue</span>
+                  <span class="theme-chevron" aria-hidden="true">^</span>
+                </button>
+                <div class="theme-menu" id="theme-menu" role="listbox" aria-labelledby="theme-label" hidden>
+                  <button type="button" role="option" data-theme="classic">Orange Blue</button>
+                  <button type="button" role="option" data-theme="dark">Dark</button>
+                  <button type="button" role="option" data-theme="light">Light</button>
+                  <button type="button" role="option" data-theme="green">Green</button>
+                </div>
+              </div>
+            </div>
 
             <p class="updated sidebar-updated">
               Last updated: <span id="last-updated">--:--:--</span>
@@ -53,21 +76,25 @@
                   </div>
 
                   <div class="protocol-row" aria-label="Protocol packet totals">
-                    <div class="protocol-tile">
-                      <span>TCP</span>
-                      <strong id="tcp-packets">0</strong>
+                    <div class="protocol-group">
+                      <div class="protocol-tile">
+                        <span>TCP</span>
+                        <strong id="tcp-packets">0</strong>
+                      </div>
+                      <div class="protocol-tile">
+                        <span>UDP</span>
+                        <strong id="udp-packets">0</strong>
+                      </div>
                     </div>
-                    <div class="protocol-tile">
-                      <span>UDP</span>
-                      <strong id="udp-packets">0</strong>
-                    </div>
-                    <div class="protocol-tile">
-                      <span>ICMP</span>
-                      <strong id="icmp-packets">0</strong>
-                    </div>
-                    <div class="protocol-tile">
-                      <span>Other</span>
-                      <strong id="other-packets">0</strong>
+                    <div class="protocol-group">
+                      <div class="protocol-tile">
+                        <span>ICMP</span>
+                        <strong id="icmp-packets">0</strong>
+                      </div>
+                      <div class="protocol-tile">
+                        <span>Other</span>
+                        <strong id="other-packets">0</strong>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -75,6 +102,7 @@
                 <aside class="dashboard-controls" aria-label="Dashboard controls">
                   <div class="metric-toggle" role="group" aria-label="Metric type">
                     <button class="toggle-button active" type="button" data-metric="packets">Packets</button>
+                    <button class="toggle-button" type="button" data-metric="bits">Bits</button>
                     <button class="toggle-button" type="button" data-metric="bytes">Bytes</button>
                   </div>
                   <button class="reset-button" id="reset-button" type="button">Reset</button>
@@ -95,7 +123,6 @@
 
             <section class="view" id="table-view">
               <div class="table-toolbar">
-                <button class="toolbar-button" type="button" id="refresh-button">Refresh</button>
                 <button class="toolbar-button" type="button" id="export-button">Export</button>
               </div>
 
@@ -109,7 +136,6 @@
                       <th>In/Out</th>
                       <th>Top Protocols</th>
                       <th>Top Ports</th>
-                      <th>Action</th>
                     </tr>
                   </thead>
                   <tbody id="talkers-body"></tbody>
@@ -118,13 +144,7 @@
 
               <footer class="table-footer">
                 <span id="table-summary">Showing 0 to 0 of 0 entries</span>
-                <nav class="pagination" aria-label="Table pages">
-                  <button type="button" disabled>&lt;</button>
-                  <button class="active" type="button">1</button>
-                  <button type="button">2</button>
-                  <button type="button">3</button>
-                  <button type="button">&gt;</button>
-                </nav>
+                <nav class="pagination" id="pagination" aria-label="Table pages"></nav>
               </footer>
             </section>
           </div>
@@ -132,6 +152,6 @@
       </section>
     </main>
 
-    <script src="./app.js?v=12"></script>
+    <script src="./app.js?v=16"></script>
   </body>
 </html>

@@ -1,12 +1,9 @@
 @startuml
-' Dynamic View – Live Traffic & Access Flow
+' Dynamic View – Live Traffic Capture & Statistics Flow
 
-title Sequence Diagram – Live Traffic & Access Flow
+title Sequence Diagram – Live Traffic Capture & Statistics Flow
 
 actor "End User" as user
-participant "Gate" as gate
-participant "Mock Target" as target
-participant "Error Server" as error
 participant "CNSS API" as api
 participant "PostgreSQL" as db
 participant "TProc" as tp
@@ -20,7 +17,7 @@ tp -> tp: Determine direction (in/out)
 tp -> tp: Update IPTracker (per-IP stats)
 deactivate tp
 
-loop Every delay seconds (default 0.5s)
+loop Every delay seconds (default 1s)
     tp -> tp: Build statistics batch (JSON)
     tp -> api: HTTP POST /load
     activate api
@@ -42,23 +39,14 @@ deactivate db
 api --> user: JSON response
 deactivate api
 
-user -> gate: HTTP request to protected target
-activate gate
-gate -> gate: Check client IP against BLOCKED_IPS
-
-alt IP is allowed
-    gate -> target: Proxy request
-    activate target
-    target --> gate: Response
-    deactivate target
-    gate --> user: Forward response
-else IP is blocked
-    gate -> error: Forward to error server
-    activate error
-    error --> gate: 403 page
-    deactivate error
-    gate --> user: Access denied page
-end
-deactivate gate
+user -> api: POST /reset
+activate api
+api -> api: Reset baseline counters
+api -> db: Reset stored stats
+activate db
+db --> api: Acknowledged
+deactivate db
+api --> user: HTTP 200 OK
+deactivate api
 
 @enduml

@@ -34,10 +34,10 @@ const elements = {
   chartTitle: document.getElementById("chart-title"),
   chart: document.getElementById("traffic-chart"),
   resetButton: document.getElementById("reset-button"),
-  refreshButton: document.getElementById("refresh-button"),
   exportButton: document.getElementById("export-button"),
   talkersBody: document.getElementById("talkers-body"),
   tableSummary: document.getElementById("table-summary"),
+  pagination: document.getElementById("pagination"),
   packetCounts: {
     tcp_packets: document.getElementById("tcp-packets"),
     udp_packets: document.getElementById("udp-packets"),
@@ -77,6 +77,7 @@ const state = {
   resetPending: false,
   history: [],
   talkers: [],
+  currentPage: 1,
 };
 
 function getStatsEndpoint() {
@@ -90,10 +91,10 @@ function getStatsEndpoint() {
   const runsOutsideBackend =
     window.location.protocol === "file:" ||
     (["localhost", "127.0.0.1"].includes(window.location.hostname) &&
-      window.location.port !== "8080");
+      window.location.port !== "38080");
 
   return runsOutsideBackend
-    ? "http://localhost:8080/packets"
+    ? "http://localhost:38080/packets"
     : `${window.location.origin}/packets`;
 }
 
@@ -148,12 +149,37 @@ function formatBytes(value) {
   return `${formatNumber(amount, digits)} ${units[unitIndex]}`;
 }
 
+function formatBitValue(value) {
+  const units = ["b", "Kb", "Mb", "Gb", "Tb"];
+  let amount = positive(value);
+  let unitIndex = 0;
+
+  while (amount >= 1024 && unitIndex < units.length - 1) {
+    amount /= 1024;
+    unitIndex += 1;
+  }
+
+  return `${formatNumber(Math.round(amount))} ${units[unitIndex]}`;
+}
+
+function formatBits(value) {
+  return formatBitValue(positive(value) * 8);
+}
+
 function formatMetricRate(value) {
-  return state.metric === "packets" ? formatNumber(Math.round(value)) : formatBytes(value);
+  if (state.metric === "packets") {
+    return formatNumber(Math.round(value));
+  }
+
+  return state.metric === "bits" ? formatBits(value) : formatBytes(value);
 }
 
 function formatMetricTotal(value) {
-  return state.metric === "packets" ? formatNumber(value) : formatBytes(value);
+  if (state.metric === "packets") {
+    return formatNumber(value);
+  }
+
+  return state.metric === "bits" ? formatBits(value) : formatBytes(value);
 }
 
 function getTimeMs(stats) {
@@ -321,7 +347,7 @@ function normalizePorts(row) {
   const rowPackets = positive(row.packets ?? row.total_packets ?? row.totalPackets ?? 0);
 
   if (Array.isArray(source)) {
-    return source.slice(0, 4).map((item) => {
+    return source.map((item) => {
       if (typeof item === "string" || typeof item === "number") {
         return String(item);
       }
@@ -342,7 +368,6 @@ function normalizePorts(row) {
 
     return Object.entries(source)
       .sort(([, left], [, right]) => positive(right) - positive(left))
-      .slice(0, 4)
       .map(([port, value]) => `${port}(${normalizePercent(value, total)})`);
   }
 
@@ -364,7 +389,7 @@ function normalizeTalkers(payload) {
     return [];
   }
 
-  return rows.slice(0, PAGE_SIZE).map((row, index) => {
+  return rows.map((row, index) => {
     const incoming = positive(row.incoming ?? row.in_packets ?? row.input_packets ?? 0);
     const outgoing = positive(row.outgoing ?? row.out_packets ?? row.output_packets ?? 0);
     const packets = positive(row.packets ?? row.total_packets ?? row.totalPackets ?? incoming + outgoing);
@@ -385,11 +410,14 @@ function normalizeTalkers(payload) {
 function renderDashboard() {
   const stats = state.resetPending ? { ...emptyStats } : state.stats;
   const isPackets = state.metric === "packets";
+  const isBits = state.metric === "bits";
+  const unitName = isPackets ? "Packets" : isBits ? "Bits" : "Bytes";
+  const totalUnitName = unitName.toLowerCase();
 
-  elements.incomingRateLabel.textContent = isPackets ? "Incoming Packets / s" : "Incoming Bytes / s";
-  elements.outgoingRateLabel.textContent = isPackets ? "Outgoing Packets / s" : "Outgoing Bytes / s";
-  elements.incomingTotalLabel.textContent = isPackets ? "Total packets" : "Total bytes";
-  elements.outgoingTotalLabel.textContent = isPackets ? "Total packets" : "Total bytes";
+  elements.incomingRateLabel.textContent = `Incoming ${unitName} / s`;
+  elements.outgoingRateLabel.textContent = `Outgoing ${unitName} / s`;
+  elements.incomingTotalLabel.textContent = `Total ${totalUnitName}`;
+  elements.outgoingTotalLabel.textContent = `Total ${totalUnitName}`;
 
   elements.incomingRate.textContent = formatMetricRate(
     isPackets ? stats.incoming_packets_per_second : stats.incoming_bytes_per_second,
@@ -404,7 +432,8 @@ function renderDashboard() {
     isPackets ? stats.outgoing_packets : stats.outgoing_bytes,
   );
 
-  elements.chartTitle.textContent = isPackets ? "Packets Per Second" : "Bytes Per Second";
+  elements.chartTitle.textContent = `${unitName} Per Second`;
+  elements.chart.setAttribute("aria-label", `${unitName} per second traffic chart`);
   elements.packetCounts.tcp_packets.textContent = formatNumber(stats.tcp_packets);
   elements.packetCounts.udp_packets.textContent = formatNumber(stats.udp_packets);
   elements.packetCounts.icmp_packets.textContent = formatNumber(stats.icmp_packets);
@@ -465,30 +494,62 @@ function renderInOut(row) {
   return container;
 }
 
-function renderActions() {
-  const container = document.createElement("div");
-  container.className = "actions-cell";
+function createPageButton(label, options = {}) {
+  const button = document.createElement("button");
+  button.type = "button";
+  button.textContent = label;
+  button.disabled = Boolean(options.disabled);
+  button.classList.toggle("active", Boolean(options.active));
 
-  ["View", "Block"].forEach((label) => {
-    const button = document.createElement("button");
-    button.className = "row-action";
-    button.type = "button";
-    button.textContent = label;
-    container.appendChild(button);
-  });
+  if (options.page) {
+    button.dataset.page = String(options.page);
+    button.setAttribute("aria-label", options.ariaLabel || `Page ${options.page}`);
+    if (options.active) {
+      button.setAttribute("aria-current", "page");
+    }
+  }
 
-  return container;
+  return button;
+}
+
+function renderPagination(totalPages) {
+  const fragment = document.createDocumentFragment();
+  fragment.appendChild(
+    createPageButton("<", {
+      page: state.currentPage - 1,
+      disabled: state.currentPage === 1,
+      ariaLabel: "Previous page",
+    }),
+  );
+
+  for (let page = 1; page <= totalPages; page += 1) {
+    fragment.appendChild(createPageButton(String(page), { page, active: page === state.currentPage }));
+  }
+
+  fragment.appendChild(
+    createPageButton(">", {
+      page: state.currentPage + 1,
+      disabled: state.currentPage === totalPages,
+      ariaLabel: "Next page",
+    }),
+  );
+  elements.pagination.replaceChildren(fragment);
 }
 
 function renderTable() {
-  const rows = state.resetPending ? [] : state.talkers;
+  const allRows = state.resetPending ? [] : state.talkers;
+  const totalPages = Math.max(1, Math.ceil(allRows.length / PAGE_SIZE));
+  state.currentPage = Math.min(Math.max(state.currentPage, 1), totalPages);
+  const firstIndex = (state.currentPage - 1) * PAGE_SIZE;
+  const rows = allRows.slice(firstIndex, firstIndex + PAGE_SIZE);
   elements.talkersBody.replaceChildren();
+  renderPagination(totalPages);
 
   if (rows.length === 0) {
     const row = document.createElement("tr");
     row.className = "empty-row";
     const cell = document.createElement("td");
-    cell.colSpan = 7;
+    cell.colSpan = 6;
     cell.textContent = "No entries";
     row.appendChild(cell);
     elements.talkersBody.appendChild(row);
@@ -504,16 +565,16 @@ function renderTable() {
     row.appendChild(createCell(renderInOut(talker)));
     row.appendChild(createCell(renderPills(talker.protocols.length ? talker.protocols : ["Other 100%"])));
     row.appendChild(createCell(renderPorts(talker.ports)));
-    row.appendChild(createCell(renderActions()));
     elements.talkersBody.appendChild(row);
   });
 
-  elements.tableSummary.textContent = `Showing 1 to ${rows.length} of ${rows.length} entries`;
+  const lastIndex = firstIndex + rows.length;
+  elements.tableSummary.textContent = `Showing ${firstIndex + 1} to ${lastIndex} of ${allRows.length} entries`;
 }
 
 function drawGrid(ctx, plot, maxAbs) {
   ctx.save();
-  ctx.strokeStyle = "rgba(255, 138, 0, 0.2)";
+  ctx.strokeStyle = getComputedStyle(document.body).getPropertyValue("--line-dim").trim();
   ctx.lineWidth = 1;
   ctx.setLineDash([3, 7]);
 
@@ -530,9 +591,44 @@ function drawGrid(ctx, plot, maxAbs) {
   ctx.restore();
 }
 
+function formatAxisValue(value) {
+  const sign = value < 0 ? "-" : "";
+  const amount = Math.abs(value);
+
+  if (state.metric === "packets") {
+    return `${sign}${formatNumber(Math.round(amount))}`;
+  }
+
+  const formatted = state.metric === "bits" ? formatBitValue(amount) : formatBytes(amount);
+  return `${sign}${formatted}`;
+}
+
+function drawYAxisLabels(ctx, plot, maxAbs) {
+  ctx.save();
+  ctx.fillStyle = getComputedStyle(document.body).getPropertyValue("--text-soft").trim();
+  ctx.font = '12px "Courier New", Consolas, monospace';
+  ctx.textAlign = "right";
+  ctx.textBaseline = "middle";
+
+  [1, 0.5, 0, -0.5, -1].forEach((ratio) => {
+    const y = plot.top + ((1 - ratio) / 2) * plot.height;
+    ctx.fillText(formatAxisValue(ratio * maxAbs), plot.left - 10, y);
+  });
+
+  ctx.restore();
+}
+
+function getNiceScaleMaximum(value) {
+  const paddedValue = Math.max(1, value * 1.2);
+  const magnitude = 10 ** Math.floor(Math.log10(paddedValue));
+  const normalized = paddedValue / magnitude;
+  const niceFactor = [1, 2, 5, 10].find((factor) => normalized <= factor) || 10;
+  return niceFactor * magnitude;
+}
+
 function drawAxes(ctx, plot) {
   ctx.save();
-  ctx.strokeStyle = "#ff8a00";
+  ctx.strokeStyle = getComputedStyle(document.body).getPropertyValue("--line").trim();
   ctx.lineWidth = 2;
   ctx.setLineDash([]);
 
@@ -552,7 +648,7 @@ function drawAxes(ctx, plot) {
 
 function drawTimeLabels(ctx, plot, startTime, endTime) {
   ctx.save();
-  ctx.strokeStyle = "rgba(255, 138, 0, 0.16)";
+  ctx.strokeStyle = getComputedStyle(document.body).getPropertyValue("--line-dim").trim();
   ctx.setLineDash([3, 7]);
 
   const tickInterval = 10 * 1000;
@@ -580,7 +676,7 @@ function drawSeries(ctx, points, getValue, plot, startTime, endTime, maxAbs, das
   const yFor = (value) => plot.top + ((maxAbs - value) / (maxAbs * 2)) * plot.height;
 
   ctx.save();
-  ctx.strokeStyle = "#ff8a00";
+  ctx.strokeStyle = getComputedStyle(document.body).getPropertyValue("--line").trim();
   ctx.lineWidth = 2;
   ctx.setLineDash(dashed ? [8, 7] : []);
   ctx.beginPath();
@@ -621,27 +717,30 @@ function drawChart() {
   ctx.clearRect(0, 0, rect.width, rect.height);
 
   const plot = {
-    left: 34,
-    top: 10,
-    width: rect.width - 48,
-    height: rect.height - 24,
+    left: 96,
+    top: 18,
+    width: rect.width - 112,
+    height: rect.height - 36,
   };
   const points = state.resetPending ? [] : state.history;
   const endTime = Date.now();
   const startTime = endTime - HISTORY_WINDOW_MS;
-  const incomingKey = state.metric === "packets" ? "incomingPackets" : "incomingBytes";
-  const outgoingKey = state.metric === "packets" ? "outgoingPackets" : "outgoingBytes";
+  const isPackets = state.metric === "packets";
+  const scale = state.metric === "bits" ? 8 : 1;
+  const incomingKey = isPackets ? "incomingPackets" : "incomingBytes";
+  const outgoingKey = isPackets ? "outgoingPackets" : "outgoingBytes";
   const maxValue = points.reduce(
-    (maximum, point) => Math.max(maximum, point[incomingKey], point[outgoingKey]),
+    (maximum, point) => Math.max(maximum, point[incomingKey] * scale, point[outgoingKey] * scale),
     1,
   );
-  const maxAbs = Math.max(1, maxValue * 1.35);
+  const maxAbs = getNiceScaleMaximum(maxValue);
 
   drawGrid(ctx, plot, maxAbs);
+  drawYAxisLabels(ctx, plot, maxAbs);
   drawTimeLabels(ctx, plot, startTime, endTime);
   drawAxes(ctx, plot);
-  drawSeries(ctx, points, (point) => point[incomingKey], plot, startTime, endTime, maxAbs, false);
-  drawSeries(ctx, points, (point) => -point[outgoingKey], plot, startTime, endTime, maxAbs, true);
+  drawSeries(ctx, points, (point) => point[incomingKey] * scale, plot, startTime, endTime, maxAbs, false);
+  drawSeries(ctx, points, (point) => -point[outgoingKey] * scale, plot, startTime, endTime, maxAbs, true);
 }
 
 function render() {
@@ -758,8 +857,16 @@ elements.metricButtons.forEach((button) => {
 });
 
 elements.resetButton.addEventListener("click", resetDashboard);
-elements.refreshButton.addEventListener("click", loadStats);
 elements.exportButton.addEventListener("click", exportTalkers);
+elements.pagination.addEventListener("click", (event) => {
+  const button = event.target.closest("button[data-page]");
+  if (!button || button.disabled) {
+    return;
+  }
+
+  state.currentPage = Number(button.dataset.page);
+  renderTable();
+});
 window.addEventListener("resize", drawChart);
 
 render();
@@ -769,4 +876,55 @@ const pollTimer = window.setInterval(loadStats, POLL_INTERVAL_MS);
 
 window.addEventListener("beforeunload", () => {
   window.clearInterval(pollTimer);
+});
+
+const themeTrigger = document.getElementById("theme-trigger");
+const themeValue = document.getElementById("theme-value");
+const themeMenu = document.getElementById("theme-menu");
+const themeOptions = Array.from(themeMenu.querySelectorAll("[data-theme]"));
+
+function applyTheme(theme) {
+  document.body.setAttribute("data-theme", theme);
+  localStorage.setItem("traffic-theme", theme);
+  const selectedOption = themeOptions.find((option) => option.dataset.theme === theme);
+  themeValue.textContent = selectedOption?.textContent || "Orange Blue";
+  themeOptions.forEach((option) => {
+    option.setAttribute("aria-selected", String(option.dataset.theme === theme));
+  });
+  drawChart();
+}
+
+function setThemeMenuOpen(isOpen) {
+  themeMenu.hidden = !isOpen;
+  themeTrigger.setAttribute("aria-expanded", String(isOpen));
+}
+
+const availableThemes = themeOptions.map((option) => option.dataset.theme);
+const savedTheme = localStorage.getItem("traffic-theme");
+const initialTheme = availableThemes.includes(savedTheme) ? savedTheme : "classic";
+applyTheme(initialTheme);
+
+themeTrigger.addEventListener("click", () => {
+  setThemeMenuOpen(themeMenu.hidden);
+});
+
+themeOptions.forEach((option) => {
+  option.addEventListener("click", () => {
+    applyTheme(option.dataset.theme);
+    setThemeMenuOpen(false);
+    themeTrigger.focus();
+  });
+});
+
+document.addEventListener("click", (event) => {
+  if (!event.target.closest(".theme-picker")) {
+    setThemeMenuOpen(false);
+  }
+});
+
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape" && !themeMenu.hidden) {
+    setThemeMenuOpen(false);
+    themeTrigger.focus();
+  }
 });
