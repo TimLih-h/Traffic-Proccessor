@@ -10,13 +10,6 @@ package "Traffic Processor System" {
     () "HTTP POST /load" as load_api
   }
   
-  package "Access Control" {
-    [Gate] as gate
-    [Mock Target] as mock_target
-    [Error Server] as error_server
-    () "HTTP Proxy" as proxy_api
-  }
-  
   package "Control & Status" {
     [CNSS] as cnss
     () "GET /packets" as get_api
@@ -40,12 +33,6 @@ load_api --> cnss : sends stats
 
 ' Client access
 dashboard --> cnss : HTTP
-network --> gate : HTTP
-
-' Gate routing
-gate --> proxy_api
-proxy_api --> mock_target : if allowed
-proxy_api --> error_server : if blocked
 
 ' Persistence
 cnss --> sql_api
