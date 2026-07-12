@@ -10,7 +10,7 @@
 
 ## User Stories
 
-- [User Stories (reports/week2/user-stories.md)](./user-stories.md)
+- [User Stories](./user-stories.md)
 
 ---
 
