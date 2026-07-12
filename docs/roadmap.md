@@ -31,6 +31,9 @@
 
 - 6/07/2026 - 12/07/2026
 - [Milestone](https://github.com/SWP-Team-46/Traffic-Proccessor/milestone/4)
+- [Separate CNSS and TP startup](https://github.com/SWP-Team-46/Traffic-Proccessor/issues/121)
+- [Update web dashboard](https://github.com/SWP-Team-46/Traffic-Proccessor/issues/10)
+- [Update documentation](https://github.com/SWP-Team-46/Traffic-Proccessor/issues/111)([architecture](https://github.com/SWP-Team-46/Traffic-Proccessor/issues/116), [readme](https://github.com/SWP-Team-46/Traffic-Proccessor/issues/117), etc.)
 
 ### Sprint 5
 
