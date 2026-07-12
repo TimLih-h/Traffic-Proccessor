@@ -12,6 +12,8 @@
 
 The easiest way to try the current version is to run the fully containerised stack:
 
+Install [docker desktop](https://www.docker.com/products/docker-desktop/)
+
 ```bash
 git clone https://github.com/SWP-Team-46/Traffic-Proccessor.git
 cd Traffic-Proccessor/src
