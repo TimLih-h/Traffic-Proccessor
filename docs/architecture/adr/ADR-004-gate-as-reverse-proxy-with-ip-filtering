@@ -3,7 +3,7 @@
 ## Status
 **Deprecated**
 
-> This decision was implemented in the `main` branch but has been **removed** in the `dev` branch. The current system consists only of TProc, CNSS, and PostgreSQL. Gate, Mock Target, and Error Server are no longer part of the architecture.
+> This decision was implemented in the `main` branch but has been **removed**. The current system consists only of TProc, CNSS, and PostgreSQL. Gate, Mock Target, and Error Server are no longer part of the architecture.
 
 ---
 
@@ -44,7 +44,7 @@ Gate was built using **FastAPI** with `httpx` for proxying, and deployed as a se
 - Increased latency due to the extra proxy hop.
 - Filtering rules must be managed externally (no built-in persistence).
 
-### In the `dev` Branch
+### Latest
 - Gate has been **removed** along with Mock Target and Error Server.
 - The system now focuses solely on traffic capture (TProc) and statistics visualization (CNSS).
 - All access control logic is out of scope for the current version.
