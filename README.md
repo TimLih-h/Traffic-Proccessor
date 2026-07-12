@@ -23,7 +23,7 @@ Once running, open the **web dashboard** at
 
 For programmatic access, use the CNSS API endpoints (`POST /load`, `GET /packets`, `POST /reset`).
 
-> **Current release:** [v2.0.0](CHANGELOG.md) – adds per‑IP statistics and blacklist‑based traffic blocking.
+> **Current release:** [v2.0.0](CHANGELOG.md) - adds per‑IP statistics and blacklist‑based traffic blocking.
 
 ---
 
@@ -48,14 +48,14 @@ For the current product state, handover scope, and customer‑facing instruction
 
 ## Contributing & Agent Workflow
 
-- **[CONTRIBUTING.md](CONTRIBUTING.md)** – Practical steps for setting up, branching, opening PRs, and meeting review requirements.
-- **[AGENTS.md](AGENTS.md)** – Actionable setup, build, test, and safety instructions for coding agents.
+- **[CONTRIBUTING.md](CONTRIBUTING.md)** - Practical steps for setting up, branching, opening PRs, and meeting review requirements.
+- **[AGENTS.md](AGENTS.md)** - Actionable setup, build, test, and safety instructions for coding agents.
 
 ---
 
 ## Quick Setup & Run
 
-All development is containerised with Docker Compose – no system‑wide Python dependencies are required.
+All development is containerised with Docker Compose - no system‑wide Python dependencies are required.
 
 ```bash
 # Clone and start all services
