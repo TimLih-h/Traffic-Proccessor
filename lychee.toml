@@ -1,4 +1,10 @@
 # Exclude problematic URLs and patterns
+exclude_path = [
+    ".git",
+    "target",
+    "venv",
+    "__pycache__",
+]
 exclude = [
     # Ignore all localhost ips
     "regex:^http://localhost(:\d+)?/",
