@@ -72,8 +72,11 @@
 
 30. **Contribution traceability table mapping each team member to issues, PRs or MRs, review activity, testing, documentation, transition, or deployment work.**  
 
-31. **Embedded screenshots from `reports/week6/images/` for the Sprint milestone, Week 6 release, example reviewed issue-linked PR or MR, and other inspectable Week 6 evidence where public links may not be reliably inspectable.**  
+31. **Screenshots from `reports/week6/images/` for the Sprint milestone, Week 6 release, example reviewed issue-linked PR**  
 
+![Sprint milestone](images/milestone.png)
+![SemVer release](images/release.png)
+![Example reviewed issue-linked PR or MR](images/reviewed_issue-linked_PR.png)
 
 <!--
 1. Project name and short description.
