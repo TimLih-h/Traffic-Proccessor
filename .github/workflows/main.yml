@@ -10,6 +10,21 @@ jobs:
   build-and-test:
     runs-on: ubuntu-latest
 
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: testuser
+          POSTGRES_PASSWORD: testpass
+          POSTGRES_DB: testdb
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
@@ -37,19 +52,14 @@ jobs:
       run: |
         flake8 src/ --count --select=E9,F63,F7,F82 --show-source --statistics
 
-    - name: Build Docker images
-      run: |
-        cd src
-        docker compose build
-
     - name: Run Tests with Pytest
+      env:
+        DB_HOST: localhost
+        DB_PORT: 5432
+        DB_USER: testuser
+        DB_PASSWORD: testpass
+        DB_NAME: testdb
       run: |
-        cd src
-        docker compose up -d
-        echo "Waiting 15 seconds for services to initialize"
-        sleep 15
-        cd ..
-        
         set +e  # temporarily disable exit on error
         pytest src/ --cov=src/ --cov-report=xml --cov-report=html --maxfail=1 --disable-warnings -v
         EXIT_CODE=$?
@@ -64,7 +74,11 @@ jobs:
           echo "Tests failed with exit code $EXIT_CODE"
           exit $EXIT_CODE
         fi
-        docker compose down
+        
+    - name: Build Docker images
+      run: |
+        cd src
+        docker compose build
       
     # Containers start and stay healthy
     - name: Smoke Test
