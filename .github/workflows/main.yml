@@ -48,6 +48,7 @@ jobs:
         docker compose up -d
         echo "Waiting 15 seconds for services to initialize"
         sleep 15
+        cd ..
         
         set +e  # temporarily disable exit on error
         pytest src/ --cov=src/ --cov-report=xml --cov-report=html --maxfail=1 --disable-warnings -v
