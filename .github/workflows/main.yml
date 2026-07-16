@@ -10,6 +10,21 @@ jobs:
   build-and-test:
     runs-on: ubuntu-latest
 
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: testuser
+          POSTGRES_PASSWORD: testpass
+          POSTGRES_DB: testdb
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
@@ -23,14 +38,11 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        # Install requirements for ALL services (if they exist)
+        # Install requirements for ALL services
         find src -name "requirements.txt" -exec pip install -r {} \;
         # Install testing libraries
         pip install netifaces scapy pytest
         pip install pytest pytest-cov requests flake8
-
-    - name: Install CNSS dependencies
-      run: |
         pip install poetry
         cd src/cnss
         poetry config virtualenvs.create false
@@ -41,6 +53,12 @@ jobs:
         flake8 src/ --count --select=E9,F63,F7,F82 --show-source --statistics
 
     - name: Run Tests with Pytest
+      env:
+        DB_HOST: localhost
+        DB_PORT: 5432
+        DB_USER: testuser
+        DB_PASSWORD: testpass
+        DB_NAME: testdb
       run: |
         set +e  # temporarily disable exit on error
         pytest src/ --cov=src/ --cov-report=xml --cov-report=html --maxfail=1 --disable-warnings -v
@@ -56,7 +74,7 @@ jobs:
           echo "Tests failed with exit code $EXIT_CODE"
           exit $EXIT_CODE
         fi
-
+        
     - name: Build Docker images
       run: |
         cd src
@@ -77,4 +95,3 @@ jobs:
         
         echo "All containers are running"
         docker compose down
-

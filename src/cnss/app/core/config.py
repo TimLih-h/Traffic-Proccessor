@@ -3,11 +3,10 @@ from pathlib import Path
 import logging
 
 from dotenv import load_dotenv
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
-env = load_dotenv()
+load_dotenv(override=True)
 
-# Logger settings
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger()
 
@@ -15,15 +14,17 @@ BASE_DIR = Path(__file__).parent.parent
 DEV_MODE = getenv("DEV_MODE", "true").strip().lower() in {"1", "true", "yes"}
 
 class Settings(BaseSettings):
-    DB_NAME: str = "test"
-    DB_USER: str = "test"
-    DB_PASSWORD: str = "test"
+    DB_NAME: str = "testdb"
+    DB_USER: str = "testuser"
+    DB_PASSWORD: str = "testpass"
     DB_HOST: str = "localhost"
     DB_PORT: str = "5432"
-
-    class ConfigDict:
-        env: Path = BASE_DIR / ".env"
-
+    
+    model_config = SettingsConfigDict(
+        env_file=BASE_DIR / ".env",
+        env_file_encoding="utf-8",
+        extra="ignore"
+    )
 
 settings = Settings()
 
