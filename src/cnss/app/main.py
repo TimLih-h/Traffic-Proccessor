@@ -74,8 +74,8 @@ async def load(body: NetworkStats):
 async def history(
     limit: int = Query(100, le=1000),
     offset: int = 0,
-    date_from: datetime | None = Query(None, description="ISO timestamp, включая"),
-    date_to: datetime | None = Query(None, description="ISO timestamp, исключая"),
+    date_from: datetime | None = Query(None, description="ISO timestamp, inclusive"),
+    date_to: datetime | None = Query(None, description="ISO timestamp, exclusive"),
 ):
     if date_from and date_to and date_from > date_to:
         raise HTTPException(400, "date_from must be earlier than date_to")

@@ -5,9 +5,9 @@ services:
     container_name: postgres_container_swp
     image: postgres:14.8-alpine3.18
     environment:
-      POSTGRES_DB: "postgresdb"
-      POSTGRES_USER: "postgres_user"
-      POSTGRES_PASSWORD: "password123"
+      POSTGRES_DB: "testdb"
+      POSTGRES_USER: "testuser"
+      POSTGRES_PASSWORD: "testpass"
       PGDATA: "/var/lib/postgresql/data/pgdata"
     volumes:
       - postgresdb-data:/var/lib/postgresql/data
@@ -53,11 +53,11 @@ services:
   app:
     build: .
     environment:
-      - DB_NAME=postgresdb
-      - DB_USER=postgres_user
-      - DB_PASSWORD=password123
+      - DB_NAME=testdb
+      - DB_USER=testuser
+      - DB_PASSWORD=testpassword
       - DB_HOST=postgres
-      - DB_PORT=5432
+      - DB_PORT=5433
     ports:
       - "8080:8080"
     command: >

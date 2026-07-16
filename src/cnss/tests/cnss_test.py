@@ -2,6 +2,7 @@ import pytest
 from fastapi.testclient import TestClient
 from app.main import app
 from datetime import datetime, timedelta
+import app.main as main_module
 
 
 @pytest.fixture
@@ -11,6 +12,13 @@ def client():
     # и любой запрос, трогающий БД, упадёт с RuntimeError -> 500.
     with TestClient(app) as c:
         yield c
+
+
+@pytest.fixture(autouse=True)
+def reset_globals():
+    main_module.last_info = None
+    main_module.reset_dump = None
+    yield
 
 
 def test_insert_packets_info(client):
